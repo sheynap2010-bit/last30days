@@ -118,16 +118,26 @@ blocks the strip, and being vertical it still prints cleanly.
   between the cavity and the latch pocket.
 - **No supports anywhere except under the bottom dome.**
 
-### Two bottoms are supplied
+### Supports: none
 
-| file | bottom | printing |
+`strip_case.stl` ships with the bottom truncated 2.64 mm — the exact 45°
+limit — giving **124 mm² of bed contact and no support anywhere in the
+print**. A layer-by-layer scan at 0.20 mm finds only three places where
+material starts without something under it:
+
+| z | area | what it is |
 |---|---|---|
-| `strip_case.stl` | full hemisphere | touches the bed at a point — **needs a brim and support under the lowest ~3 mm** |
-| `strip_case_flatbottom.stl` | truncated 2.64 mm | **124 mm² of bed contact, 45° at the bed, no support at all** |
+| 76.80 | 57 mm² | the cap's first layer, bridging the 0.6 mm split |
+| 70.0–70.2 | 6.7 mm² | the lug's underside, 0.5 mm over its recess |
+| 71.4 | 4.5 mm² | the pin's underside, 0.4 mm over the bore |
 
-The flat-bottom one is the safer print by a wide margin, and 2.64 mm off a
-9 mm dome is hard to see on a Ø18 barrel. Everything above the bottom dome is
-identical between the two.
+All three are short bridges onto solid material directly below, which is
+exactly what a print-in-place mechanism is. The cap's bottom outer edge is
+chamfered 0.8 mm at 45°, which starts that first layer as a narrower ring and
+grows it outward — it cut the bridged area from 101 mm² to 57 mm².
+
+For the full hemisphere instead, set `BOT_FLAT = 0.0` in `model.py` and
+rebuild. It then needs a brim and support under the lowest ~3 mm.
 
 ### First open
 

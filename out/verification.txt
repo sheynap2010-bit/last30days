@@ -1,9 +1,9 @@
 grid step 0.30 mm
-  body  sample  14.3s  march   7.3s  smooth  19.0s  350814 verts (73112 relaxed)  701636 tris
-  cap   sample   2.0s  march   1.8s  smooth   2.5s   88826 verts (17198 relaxed)  177648 tris
-  volume body  13713.2 mm^3  cap   2430.6 mm^3  total  16143.7
-  mass at 100% infill: 20.02 g
-  wrote 879284 triangles to out/strip_case.stl
+  body  sample  23.1s  march  11.0s  smooth  29.9s  358418 verts (73706 relaxed)  716844 tris
+  cap   sample   3.1s  march   2.2s  smooth   3.5s   87896 verts (17338 relaxed)  175788 tris
+  volume body  14156.2 mm^3  cap   2409.4 mm^3  total  16565.6
+  mass at 100% infill: 20.54 g
+  wrote 892632 triangles to out/strip_case.stl
 
 1. topology
 -----------
@@ -58,11 +58,7 @@ grid step 0.30 mm
 
 5. measurements
 ---------------
-  bottom truncation 0.00 mm  ->  bed contact 0.0 mm^2
-        A full 9.00 mm round bottom, as asked for. It meets the bed
-        at a point, so it needs a brim and support under the lowest
-        ~3 mm. BOT_FLAT = 3.09 in model.py gives the roundest
-        support-free bottom instead: 103 mm^2, 45 deg at the bed.
+  bottom truncation 2.64 mm  ->  bed contact 124.0 mm^2
   material between the pin hole and the ear surface: 1.20 mm
         thinnest at 89 deg round the axis, ear at x = -4.5   (need >= 1.2)
   cavity  10.81 wide x 7.00 thick x 66.50 deep
@@ -76,17 +72,17 @@ grid step 0.30 mm
   bead 0.75 proud, 0.45 engaged past the skirt (0.30 is clearance)
   force to deflect it clear of the groove: 10.1 N   (target 8-12)
   peak surface strain at the root: 0.92 %   (PLA yields near 2-3 %)
-  body  surface samples steeper than 45 deg: 1085 of 39949 (2.72 %)
-        (plus 53 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (0.00, -8.10, 10.73)
-  cap   surface samples steeper than 45 deg: 2108 of 40000 (5.27 %)
-        (plus 467 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-2.00, -8.16, 76.80)
+  body  surface samples steeper than 45 deg: 370 of 39286 (0.94 %)
+        (plus 46 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-5.54, -9.15, 74.96)
+  cap   surface samples steeper than 45 deg: 1481 of 40000 (3.70 %)
+        (plus 264 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-1.15, -7.99, 76.83)
 
 6. mass
 -------
-  body 13713.2 mm^3, cap 2430.6 mm^3, total 16143.7 mm^3
-  PLA at 1.24 g/cm^3, 100% infill: 20.02 g
+  body 14156.2 mm^3, cap 2409.4 mm^3, total 16565.6 mm^3
+  PLA at 1.24 g/cm^3, 100% infill: 20.54 g
 
 summary
 -------

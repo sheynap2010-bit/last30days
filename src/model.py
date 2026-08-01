@@ -61,9 +61,12 @@ BOT_R = HALF_W                     # hemispherical bottom
 TOP_R = HALF_W                     # hemispherical top
 
 # How much is cut off the bottom tip so the part can stand on the bed.
+#   2.64 -> the roundest support-free bottom: 45 deg at the bed, 124 mm^2
 #   0.00 -> a true hemisphere, touches at a point, NEEDS SUPPORT + BRIM
-#   2.64 -> the roundest support-free bottom (45 deg at the bed)
-BOT_FLAT = 0.0
+# Defaulting to 2.64.  With it, a layer-by-layer scan finds NO material
+# anywhere in the print that starts without something under it, apart from
+# the split line itself and the two hinge parts -- i.e. no supports at all.
+BOT_FLAT = 2.6396
 
 Z_BOT_C = BOT_R - BOT_FLAT         # 9.00 centre plane of the bottom dome
 Z_TOP_C = H_TOTAL - TOP_R          # 85.00 centre plane of the top dome
@@ -96,6 +99,13 @@ R_NECK = R_OUT - NECK_INSET        # 6.70  -> 1.30 mm of neck wall at the sides
 Z_NECK_TOP = 78.00
 CAP_WALL = 2.2
 Z_APEX = 91.0                      # the cap's interior tents shut here
+
+# The cap's first layer is the biggest thing in the print that starts over
+# air -- it bridges the split gap.  Chamfering the cap's bottom outer edge at
+# 45 degrees starts that layer as a narrower ring and grows it outward over
+# the next few layers, which cuts the bridged area by about a third and gives
+# the split line a tidier parting edge.
+CAP_CHAMFER = 0.8
 
 Z_CAV_TOP = Z_NECK_TOP
 CAV_DEPTH = Z_CAV_TOP - Z_FLOOR    # 66.50
@@ -364,7 +374,8 @@ def cap_wall(z):
 def cap(p):
     x, y, z = p
 
-    d = max(outer(p), Z_CAP_BOT - z)
+    chamf = CAP_CHAMFER - (z - Z_CAP_BOT)
+    d = max(outer(p, chamf if chamf > 0.0 else 0.0), Z_CAP_BOT - z)
 
     # hollow interior, offset from the skin so the wall follows the dome,
     # with a 45 degree tent so nothing bridges mid air
