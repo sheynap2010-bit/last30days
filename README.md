@@ -80,6 +80,62 @@ stopping at 100°, and the cap's steep-overhang area dropped from 4.2 % to
 stand 3.1 mm proud of the barrel and the cap's lug 2.7 mm, like a real
 flip-top lip balm.
 
+## Printing
+
+Upright, closed, as modelled. Z = 0 is the bed. **Layer height 0.20 mm** —
+the clearances are sized as whole multiples of it.
+
+### The clearances are deliberately not all the same
+
+| interface | gap | direction |
+|---|---|---|
+| split line, body top → cap bottom | **0.60 mm** | horizontal |
+| lug → its recess in the body | **0.50 mm** | horizontal underneath |
+| pin → bore | 0.40 mm radial | |
+| neck → skirt, ear → lug | 0.30 mm | vertical |
+| latch slot | 0.45 mm | vertical |
+
+A **vertical** gap is safe at 0.3 mm because the nozzle never enters it. A
+**horizontal** one is not: the layer above it is laid down over air, and at
+0.3 mm with 0.20 mm layers that is 1.5 layers — the cap's first layer lands
+almost on the body's top face and welds to it. 0.60 mm is three layers, so at
+least two are completely empty. This is the single change most likely to
+decide whether the cap comes free.
+
+The latch slot runs the other way: it has to stay **under** the 0.5 mm strip
+thickness, because it leads from the cap's interior, down past the tab and
+out through the skin. At 0.6 mm a strip walks straight out of it. 0.45 mm
+blocks the strip, and being vertical it still prints cleanly.
+
+### Slicer settings that matter
+
+- **0.20 mm layers.** Not 0.25 or 0.3 — the split stops being a whole number
+  of layers and the gap starts closing.
+- **Gap fill off** (PrusaSlicer/Orca: "Fill gaps" / minimum feature size).
+  Otherwise the slicer may lay a thin extrusion into the 0.45 mm latch slot
+  and weld the tab solid.
+- 3 perimeters. The thinnest structural section is the 1.0 mm membrane
+  between the cavity and the latch pocket.
+- **No supports anywhere except under the bottom dome.**
+
+### Two bottoms are supplied
+
+| file | bottom | printing |
+|---|---|---|
+| `strip_case.stl` | full hemisphere | touches the bed at a point — **needs a brim and support under the lowest ~3 mm** |
+| `strip_case_flatbottom.stl` | truncated 2.64 mm | **124 mm² of bed contact, 45° at the bed, no support at all** |
+
+The flat-bottom one is the safer print by a wide margin, and 2.64 mm off a
+9 mm dome is hard to see on a Ø18 barrel. Everything above the bottom dome is
+identical between the two.
+
+### First open
+
+The two parts are never fused in the model — intersection is 0.0000 mm³ — but
+first-layer squish or a little stringing can tack them. Open it slowly the
+first time; it should break free under light thumb pressure. If it resists,
+run a thin blade round the split line rather than forcing it.
+
 ## Deviations from the brief, and why
 
 **Cavity 10.8 × 7.0, not 10 × 6.5.** A 10 × 6.5 stadium does not actually
