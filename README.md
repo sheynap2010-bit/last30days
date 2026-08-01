@@ -75,10 +75,17 @@ pin further back would break the bore out through the outside face — the exact
 failure mode the brief called out. This position gives exactly 1.20 mm of
 material all round the bore.
 
-**The back of the neck is open** from z ≈ 74.1 to 77.65, where the swept relief
+**The back of the neck is open** from z ≈ 74.3 to 77.65, where the swept relief
 clears the knuckle. The bore is fully enclosed below that, and the strips reach
-only z = 69, so they are 5.1 mm clear of the opening. The cap covers it when
+only z = 69, so they are 5.3 mm clear of the opening. The cap covers it when
 closed.
+
+**The split line is flush at the front and sides but not across the back.**
+Making it flush there wants a knuckle of radius 4.39 about the pin, and the
+ears root through exactly that annulus — a knuckle that large sweeps into them
+at about 95°. The knuckle is cut back to 3.84 instead, which leaves a 1.4 mm
+gap across the back of the split. It reads as an ordinary hinge gap, and it is
+the one place the brief's "no step, one continuous surface" is not met.
 
 ## Deliverables that could not be produced here
 
