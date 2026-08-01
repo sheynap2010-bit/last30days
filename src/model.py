@@ -110,21 +110,31 @@ EAR_BOT_Z = 72.0                   # the ear roots this far down into the body
 # sized to the ear's corner at the cap's own bottom edge, plus 0.4.
 R_EAR_RELIEF = hypot(EAR_R, Z_PIN - Z_CAP_BOT) + 0.4      # 4.24
 
-# The knuckle underside is a cylinder of exactly this radius about the axis.
-# Flushness at the split would want 4.39 -- the distance from the pin to the
-# cap's rear-bottom corner -- but the ears root through that same annulus,
-# and a knuckle that large sweeps into them around 95 deg.  The ears win:
-# the knuckle is cut back inside the ear relief, which costs a 1.4 mm gap
-# across the back of the split line and reads as an ordinary hinge gap.
-R_KNUCK = min(hypot(R_OUT + Y_PIN, Z_CAP_BOT - Z_PIN),
-              R_EAR_RELIEF - 0.4)                         # 3.84
-R_DISH = R_KNUCK + GAP                                    # 4.14
+# The knuckle underside is a cylinder about the pin axis, and its radius is
+# what decides whether the split line closes at the BACK.
+#
+# Reaching the split at the rear skin needs R_KNUCK_FULL.  Clearing the ears,
+# which root through the same annulus, needs no more than R_KNUCK_BAND.  An
+# earlier version applied the smaller radius everywhere and left a 2.7 mm
+# slot across the back of the closed case -- wide enough for a 0.5 mm strip
+# to escape through.  The ears only occupy two 3 mm bands, so the cutback
+# only belongs there: outside those bands the knuckle runs full size and the
+# split closes to its 0.3 mm print clearance.
+R_KNUCK_FULL = hypot(R_OUT + Y_PIN, Z_CAP_BOT - Z_PIN)    # 4.39
+R_KNUCK_BAND = R_EAR_RELIEF - 0.4                         # 4.54
+R_KNUCK = R_KNUCK_BAND        # kept for the dish, which must not over-carve
+R_DISH = R_KNUCK + GAP                                    # 4.84
 
 # Cylindrical reliefs get the hinge most of the way there, but the body's
 # rear shoulder and the ears' lower corners still sweep into the cap.  Rather
 # than hand-deriving another radius, the body subtracts the cap's actual
 # swept envelope over the opening range -- correct by construction.
-SWEEP_MAX_DEG = 105.0
+# 100 deg, not 105.  Past about 102 the cap's TAIL -- its rear skin well
+# above the pin, ~5.3 mm out from the axis -- swings down behind the body and
+# forces 2 mm of extra hollowing out of the body's rear shoulder, which is
+# what opened a 2.4 mm slot across the back of the closed case.  The brief
+# asks for 100; buying the last 5 degrees costs the case its back.
+SWEEP_MAX_DEG = 100.0
 SWEEP_STEP_DEG = 1.5
 SWEEP_CLEAR = 0.28                 # just under GAP, so it cannot nibble the
                                    # neck, which is already built at GAP
@@ -368,6 +378,14 @@ def body(p):
 # CAP
 # ==========================================================================
 
+def knuck_radius(x):
+    """Knuckle radius at this x: cut back only where an ear passes through."""
+    for sx in (-1.0, 1.0):
+        if abs(x - sx * EAR_X) <= EAR_HALF + GAP:
+            return R_KNUCK_BAND
+    return R_KNUCK_FULL
+
+
 def cap_wall(z):
     """Cap wall thickness: the skirt is thinner, so it clears the neck with
     GAP to spare; above the neck it thickens to CAP_WALL over a 45 degree
@@ -395,9 +413,12 @@ def cap(p):
     d = max(d, -void)
 
     # Knuckle.  Behind the pin and below it the cap keeps material only
-    # within R_KNUCK of the axis, so its underside is a cylinder concentric
-    # with the pin rather than a square corner.
-    d = max(d, -max(z - Z_PIN, max(y - Y_PIN, R_KNUCK - r_pin)))
+    # within the knuckle radius of the axis, so its underside is a cylinder
+    # concentric with the pin rather than a square corner.  This has to use
+    # the same x-dependent radius as cap(): the swept envelope is what tells
+    # the body where to get out of the way, so a smaller radius here would
+    # under-carve and the real knuckle would collide.
+    d = max(d, -max(z - Z_PIN, max(y - Y_PIN, knuck_radius(x) - r_pin)))
 
     # relief where the body ears pass through the cap: a cylinder on the pin
     # axis, teardrop roofed so its own ceiling is not an overhang
@@ -415,11 +436,16 @@ def cap(p):
 
     # latch groove: the bead's own profile, grown by GROOVE_GAP and clipped
     # at the skirt's inner face.  Its roof is a 45 degree face.
-    # There is no clip at the skirt's inner face: everything inboard of it is
-    # already void, and clipping there left the bead touching the mouth of
-    # its own groove with zero clearance.
+    # Bounded in -Y.  Without that bound the region
+    # (y - R_NECK) + |z - BEAD_Z| <= BEAD_R + GROOVE_GAP is satisfied by ANY
+    # sufficiently negative y, so the groove cut a 6.4 mm slot straight
+    # through the cap from front to back at the bead's height -- an open
+    # channel from the cavity to the outside, right where the strips are.
+    # The bound sits 0.6 mm inboard of the bead's root, far enough that the
+    # bead never touches the mouth of its own groove.
     notch = max(abs(x) - (BEAD_W / 2.0 + 0.2),
-                (y - R_NECK) + abs(z - BEAD_Z) - (BEAD_R + GROOVE_GAP))
+                max((R_NECK - 0.6) - y,
+                    (y - R_NECK) + abs(z - BEAD_Z) - (BEAD_R + GROOVE_GAP)))
     d = max(d, -notch)
 
     return d
@@ -435,7 +461,7 @@ def cap_nominal(p):
                (spine_dist(x, y, profile_scale(z)) - (Z_APEX - z)) * 0.7071)
     void = max(void, Z_CAP_BOT - 4.0 - z)
     d = max(d, -void)
-    d = max(d, -max(z - Z_PIN, max(y - Y_PIN, R_KNUCK - r_pin)))
+    d = max(d, -max(z - Z_PIN, max(y - Y_PIN, knuck_radius(x) - r_pin)))
     rel = sd_teardrop(y - Y_PIN, z - Z_PIN, R_EAR_RELIEF)
     for sx in (-1.0, 1.0):
         d = max(d, -max(rel, abs(x - sx * EAR_X) - (EAR_HALF + GAP)))

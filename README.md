@@ -129,17 +129,56 @@ pin further back would break the bore out through the outside face — the exact
 failure mode the brief called out. This position gives exactly 1.20 mm of
 material all round the bore.
 
-**The back of the neck is open** from z ≈ 74.6 to 78.0, where the swept relief
-clears the knuckle. The bore is fully enclosed below that, and the strips reach
-only z = 71.5, so they are 3.1 mm clear of the opening. The cap covers it when
-closed.
+## OPEN ISSUE: the closed case is not sealed at the back
 
-**The split line is flush at the front and sides but not across the back.**
-Making it flush there wants a knuckle of radius 4.39 about the pin, and the
-ears root through exactly that annulus — a knuckle that large sweeps into them
-at about 95°. The knuckle is cut back to 3.84 instead, which leaves a 1.4 mm
-gap across the back of the split. It reads as an ordinary hinge gap, and it is
-the one place the brief's "no step, one continuous surface" is not met.
+`check.py` section 4 measures this directly, and it currently reports that an
+8 × 0.5 mm strip **can** escape. Do not treat this design as strip-tight yet.
+
+Measured gap between the body's top and the cap's bottom, around the
+perimeter of the closed case:
+
+| bearing | gap |
+|---|---|
+| front and sides (0–75°, 285–345°) | **0.31 mm** — just the print clearance |
+| 90° / 270° (sides) | 0.80 mm |
+| 105° / 255° | 1.69 mm |
+| 150° / 210° (back) | **2.02 mm** |
+
+### Why it cannot be closed with the pin where it is
+
+Opening rotates the cap about the pin. Every point of the cap *behind* the
+pin sinks as it rotates, so the body has to be hollowed out of its way — and
+that hollow is the opening. The pin sits inside the back wall, so the cap's
+whole rear skin is behind it.
+
+Four fixes were built and measured; all failed:
+
+- **Full-size knuckle** (radius 5.02 instead of 4.54, cut back only in the
+  two ear bands): closes the split line but not the pocket — 2.45 mm.
+- **Cap tongue** reaching below the split into the pocket: seals it (the
+  1.2 mm ball test passes), but the tongue swings forward and collides with
+  the body's rim from 40° to 70°.
+- **Internal plug** entering the bore: cannot print. Anything that enters the
+  bore starts its first layer over 66 mm of open air.
+- **Less opening angle**: 100° → 2.02 mm, 85° → 1.18 mm, and then it floors
+  at **1.09 mm** all the way down to 50°. The knuckle sets that floor, not
+  the tail. Still passes a 0.5 mm strip.
+
+### The fix that does work
+
+Move the pin *behind* the rear skin, at y ≈ −6.35. Then every point of the
+cap is in front of the pin, everything rises on opening, nothing sweeps into
+the body at all — the neck stays a full 360° collar, the rim stays intact,
+and the split closes to 0.3 mm the whole way round.
+
+The cost is visual: the hinge becomes an external boss. A Ø3.5 bore needs
+1.2 mm of material round it, so the ears stand about 3 mm proud of the back,
+with a matching strap on the cap. That is what a real flip-top lip balm looks
+like, but it is not the flush silhouette this design was asked for. **It has
+not been built** — it needs a decision first, because it trades the
+appearance requirement against the containment requirement.
+
+## Deviations from the brief, and why (continued)
 
 ## Deliverables that could not be produced here
 

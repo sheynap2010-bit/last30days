@@ -116,6 +116,100 @@ def swing(cm, lo=0, hi=120, step=5, n=6000):
 
 # --------------------------------------------------------------------------
 
+def containment(step=0.25, radii=(0.25, 0.4, 0.6)):
+    """Can anything get from the cavity to the outside with the cap shut?
+
+    Flood fills the void between the two solids on a lattice, starting inside
+    the cavity, and only lets the fill pass through cells with at least `r` of
+    clearance to both solids.  If a fill of radius r reaches open air, an
+    object of diameter 2r could follow that path out.  A strip is 0.5 mm
+    thick, so the r = 0.25 fill is the one that matters.
+    """
+    lo = (-11.0, -7.0, 68.0)
+    hi = (11.0, 7.0, 84.0)
+    n = [int((hi[i] - lo[i]) / step) + 1 for i in range(3)]
+    print('  lattice %d x %d x %d at %.2f mm' % (n[0], n[1], n[2], step))
+
+    clear = {}
+    for k in range(n[2]):
+        z = lo[2] + k * step
+        for j in range(n[1]):
+            y = lo[1] + j * step
+            for i in range(n[0]):
+                p = (lo[0] + i * step, y, z)
+                dc = M.cap(p)
+                if dc <= 0.0:
+                    continue
+                db = M.body(p)
+                if db <= 0.0:
+                    continue
+                clear[(i, j, k)] = (min(db, dc), M.outer(p))
+
+    seed = (int((0.0 - lo[0]) / step), int((0.0 - lo[1]) / step),
+            int((70.0 - lo[2]) / step))
+    if seed not in clear:
+        print('  seed is not in the cavity void -- check the lattice')
+        return
+
+    def flood(passable):
+        if not passable(seed):
+            return None
+        stack, seen = [seed], {seed}
+        while stack:
+            i, j, k = stack.pop()
+            for d in ((1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)):
+                q = (i+d[0], j+d[1], k+d[2])
+                if q in seen:
+                    continue
+                c = clear.get(q)
+                if c is None or not passable(q):
+                    continue
+                seen.add(q)
+                if c[1] > 0.5:
+                    return q
+                stack.append(q)
+        return None
+
+    for r in radii:
+        hit = flood(lambda q: clear[q][0] >= r)
+        where = ('' if hit is None else
+                 '  at (%.1f, %.1f, %.1f)'
+                 % (lo[0]+hit[0]*step, lo[1]+hit[1]*step, lo[2]+hit[2]*step))
+        print('    ball  Ø%.1f mm : %s%s'
+              % (2*r, 'ESCAPES' if hit else 'contained', where))
+
+    # A strip is not a ball.  For an 8 mm wide strip to occupy a cell, that
+    # cell needs 8 mm of clear run along SOME axis.  That is a necessary
+    # condition, so if the fill cannot escape, neither can the strip.
+    run = int(M.BUNDLE_W / step)
+    def has_run(q):
+        if clear[q][0] < M.STRIP_T / 2.0:
+            return False
+        for ax in range(3):
+            best = 0
+            for s2 in (1, -1):
+                d = [0, 0, 0]
+                d[ax] = s2
+                p2, cnt = q, 0
+                while True:
+                    p2 = (p2[0]+d[0], p2[1]+d[1], p2[2]+d[2])
+                    c = clear.get(p2)
+                    if c is None or c[0] < M.STRIP_T / 2.0:
+                        break
+                    cnt += 1
+                best += cnt
+            if best + 1 >= run:
+                return True
+        return False
+
+    hit = flood(has_run)
+    print('    strip %.0f x %.1f mm : %s'
+          % (M.BUNDLE_W, M.STRIP_T, 'ESCAPES' if hit else 'CONTAINED'))
+    if hit is None:
+        print('        no path out can host an 8 mm wide strip in any')
+        print('        axis-aligned orientation -- the strips stay in')
+
+
 def bed_contact(bm):
     verts, tris = bm
     area = 0.0
@@ -352,7 +446,10 @@ def main():
     hdr('3. swing test, 0 to 120 deg about the pin axis')
     bad = swing(cm)
 
-    hdr('4. measurements')
+    hdr('4. containment -- can a strip escape when closed?')
+    containment()
+
+    hdr('5. measurements')
     bed_contact(bm)
     bore_wall()
     cavity_fit()
@@ -361,7 +458,7 @@ def main():
     overhangs(M.cap, cm, 'cap', other=M.body)
 
     vb, vc = volume(*bm), volume(*cm)
-    hdr('5. mass')
+    hdr('6. mass')
     print('  body %.1f mm^3, cap %.1f mm^3, total %.1f mm^3'
           % (vb, vc, vb + vc))
     print('  PLA at 1.24 g/cm^3, 100%% infill: %.2f g' % ((vb + vc) * M.PLA_DENSITY))

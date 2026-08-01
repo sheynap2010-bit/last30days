@@ -1,9 +1,9 @@
 grid step 0.30 mm
-  body  sample  34.0s  march   4.7s  smooth  29.1s  329132 verts (89617 relaxed)  658284 tris
-  cap   sample   1.2s  march   1.2s  smooth   2.5s   87274 verts (22893 relaxed)  174552 tris
-  volume body  11790.1 mm^3  cap   1877.6 mm^3  total  13667.8
-  mass at 100% infill: 16.95 g
-  wrote 832836 triangles to out/strip_case.stl
+  body  sample  32.6s  march   5.4s  smooth  29.7s  329634 verts (89624 relaxed)  659296 tris
+  cap   sample   1.2s  march   1.1s  smooth   2.8s   90740 verts (24768 relaxed)  181484 tris
+  volume body  11785.3 mm^3  cap   1938.9 mm^3  total  13724.1
+  mass at 100% infill: 17.02 g
+  wrote 840780 triangles to out/strip_case.stl
 
 1. topology
 -----------
@@ -21,7 +21,7 @@ grid step 0.30 mm
 
    angle   hinge hits  deepest    latch hits  note
       0          0      0.0000          0    
-      5          0      0.0000          7    detent releasing (0.15 mm, tab deflects)
+      5          0      0.0000          5    detent releasing (0.14 mm, tab deflects)
      10          0      0.0000          0    
      15          0      0.0000          0    
      20          0      0.0000          0    
@@ -41,12 +41,20 @@ grid step 0.30 mm
      90          0      0.0000          0    
      95          0      0.0000          0    
     100          0      0.0000          0    
-    105          0      0.0000          0    
-    110         35     -0.1400          0    HINGE INTERFERENCE
-    115         97     -0.5428          0    HINGE INTERFERENCE
-    120        128     -0.9342          0    HINGE INTERFERENCE
+    105         72     -0.1748          0    HINGE INTERFERENCE
+    110        110     -0.5347          0    HINGE INTERFERENCE
+    115        146     -0.8812          0    HINGE INTERFERENCE
+    120        189     -1.2255          0    HINGE INTERFERENCE
 
-4. measurements
+4. containment -- can a strip escape when closed?
+-------------------------------------------------
+  lattice 89 x 57 x 65 at 0.25 mm
+    ball  Ø0.5 mm : ESCAPES  at (-5.5, -6.8, 75.0)
+    ball  Ø0.8 mm : ESCAPES  at (-4.2, -6.8, 75.0)
+    ball  Ø1.2 mm : ESCAPES  at (-0.5, -6.8, 75.8)
+    strip 8 x 0.5 mm : ESCAPES
+
+5. measurements
 ---------------
   bottom truncation 0.00 mm  ->  bed contact 0.0 mm^2
         A full 10.55 mm round bottom, as asked for. It meets the bed
@@ -57,7 +65,7 @@ grid step 0.30 mm
         thinnest at 89 deg round the axis, ear at x = -6.0   (need >= 1.2)
   cavity  10.81 wide x 7.00 thick x 66.50 deep
   section at mid strip: 7.01 mm back to front (-3.50 to +3.50)
-  fully enclosed up to z = 74.6; strips reach z = 71.5  -> 3.1 mm of margin
+  fully enclosed up to z = 74.7; strips reach z = 71.5  -> 3.2 mm of margin
   bundle  8.00 wide x 5.00 thick x 60.00 long (10 x 0.5 mm strips)
   clearance at the bundle corners: +0.21 mm, best seating y = +0.00
         (measured above the 0.6 mm fillet at the cavity floor)
@@ -66,23 +74,24 @@ grid step 0.30 mm
   bead 0.75 proud, 0.45 engaged past the skirt (0.30 is clearance)
   force to deflect it clear of the groove: 10.1 N   (target 8-12)
   peak surface strain at the root: 0.91 %   (PLA yields near 2-3 %)
-  body  surface samples steeper than 45 deg: 844 of 39952 (2.11 %)
-        (plus 269 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-4.93, -2.56, 81.46)
-  cap   surface samples steeper than 45 deg: 1659 of 39999 (4.15 %)
-        (plus 1038 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-3.57, -5.49, 76.50)
+  body  surface samples steeper than 45 deg: 826 of 39950 (2.07 %)
+        (plus 309 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 89 deg at (-5.17, -2.56, 81.40)
+  cap   surface samples steeper than 45 deg: 1895 of 39999 (4.74 %)
+        (plus 992 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-4.00, -6.02, 76.50)
 
-5. mass
+6. mass
 -------
-  body 11790.1 mm^3, cap 1877.6 mm^3, total 13667.8 mm^3
-  PLA at 1.24 g/cm^3, 100% infill: 16.95 g
+  body 11785.3 mm^3, cap 1938.9 mm^3, total 13724.1 mm^3
+  PLA at 1.24 g/cm^3, 100% infill: 17.02 g
 
 summary
 -------
   topology ok        : True
   closed-position hits: 0
-  swing stations with interference: 3
-     110 deg: 35 points, -0.140 mm
-     115 deg: 97 points, -0.543 mm
-     120 deg: 128 points, -0.934 mm
+  swing stations with interference: 4
+     105 deg: 72 points, -0.175 mm
+     110 deg: 110 points, -0.535 mm
+     115 deg: 146 points, -0.881 mm
+     120 deg: 189 points, -1.225 mm
