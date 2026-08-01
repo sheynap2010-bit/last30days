@@ -16,6 +16,7 @@ out/strip_case_body.stl,
 out/strip_case_cap.stl  the same two solids split out, world coordinates
 out/strip_case.obj      both solids as named objects, for Blender
 out/verification.txt    the full check output
+out/views.png           front closed, side closed, side open at 105 deg
 ```
 
 Regenerate: `cd src && python3 check.py 0.3` (no dependencies, stdlib only).
@@ -26,16 +27,48 @@ and runs every check.
 
 | | |
 |---|---|
-| Envelope | 21.1 W × 12.4 T × 88 H mm — stadium section, 1.70 : 1, 7.1 : 1 long |
-| Cavity | 10.8 × 7.0 stadium, 68.65 deep |
+| Envelope | 21.1 W × 12.4 T × 95 H mm — stadium section, 1.70 : 1 |
+| Ends | half-ellipsoids, R10.55 in front view — a true U, not a swept flat |
+| Cavity | 10.8 × 7.0 stadium, 66.0 deep |
 | Wall | 2.7 mm around the cavity, 2.2 mm cap, 2.0 mm skirt |
 | Hinge | Ø2.7 captive pins on the cap, Ø3.5 bores in two body ears at x = ±6 |
 | Latch | 8 × 1.8 × 11.65 mm cantilever, 45° bead into a matching 45° groove |
 | Keyring | Ø4.5 through the bottom dome, axis along the thickness |
-| Mass | ~17 g in PLA at 100% infill |
+| Mass | 16.6 g in PLA at 100% infill |
 
 Coordinates: Z is the long axis with Z=0 on the bed, X is the wide direction,
 −Y is the back (hinge), +Y is the front (latch).
+
+## The end shape — the thing that decides whether it reads as a vape
+
+Both ends scale the *whole* stadium cross section to zero along a circular
+profile whose radius is the body's half width. The front view of each end is
+therefore an exact semicircle spanning the full width: a **U**.
+
+The obvious alternative — sweeping the stadium, i.e. offsetting it in 3D —
+gives a bottom that is flat across the middle with rounded corners. That is
+what the first version did, and it read unmistakably as a tube. It is a
+different surface, not a smaller radius, and no amount of filleting fixes it.
+
+**The cost: a true U cannot print support-free standing up.** The bottom is
+tangent to the bed at a single point, and the last few millimetres overhang
+past 45°. Measured on the R10.55 bottom:
+
+| cut off the tip | bed contact | wall angle at the bed |
+|---|---|---|
+| 0.00 mm (a true U) | a point | 90° |
+| 1.00 mm | 37 mm² | 65° |
+| 2.00 mm | 71 mm² | 54° |
+| **3.09 mm** | **103 mm²** | **45° — the support-free limit** |
+
+3.09 mm off a 10.55 mm dome leaves a round-over, not a U — which is the shape
+that was rejected. So the model ships at `BOT_FLAT = 0.0`: fully round, print
+with a brim and support under the lowest ~3 mm. One line in `model.py`
+(`BOT_FLAT = 3.09`) switches to the support-free bottom if you change your
+mind.
+
+This is the one place this design knowingly breaks the original brief's "no
+support material".
 
 ## How it is modelled, and why not with booleans
 
@@ -80,9 +113,9 @@ pin further back would break the bore out through the outside face — the exact
 failure mode the brief called out. This position gives exactly 1.20 mm of
 material all round the bore.
 
-**The back of the neck is open** from z ≈ 74.3 to 77.65, where the swept relief
+**The back of the neck is open** from z ≈ 73.6 to 77.0, where the swept relief
 clears the knuckle. The bore is fully enclosed below that, and the strips reach
-only z = 69, so they are 5.3 mm clear of the opening. The cap covers it when
+only z = 71, so they are 2.6 mm clear of the opening. The cap covers it when
 closed.
 
 **The split line is flush at the front and sides but not across the back.**
@@ -136,14 +169,14 @@ From `out/verification.txt`, 0.30 mm marching grid:
 | Swing 0–105° | **no hinge contact at any station** |
 | Swing 110°+ | contact — this is the end stop, past the 100° requirement |
 | Latch at 5° | 0.12 mm contact on the bead only: the detent releasing |
-| Bed contact | 150.3 mm² (need ≥ 100) |
+| Bottom | full R10.55 round, 0 mm² bed contact — needs a brim + tip support |
 | Wall round the pin hole | 1.20 mm (need ≥ 1.2) |
 | Bundle clearance | +0.21 mm at the corners |
-| Cavity enclosed to | z = 74.3; strips reach z = 69.0 → 5.3 mm margin |
+| Cavity enclosed to | z = 73.6; strips reach z = 71.0 → 2.6 mm margin |
 | Latch force | 10.1 N (target 8–12) |
 | Latch peak strain | 0.91 % (PLA yields near 2–3 %) |
-| Mass | 17.16 g at 100 % infill |
-| Steep overhangs | body 0.76 %, cap 3.16 % of sampled surface — see below |
+| Mass | 16.61 g at 100 % infill |
+| Steep overhangs | body 2.16 %, cap 4.17 % — most of the body figure is the round bottom, by design |
 
 The swing test rotates the cap about the pin axis in 5° steps and evaluates
 the body's SDF at ~6000 cap-surface points per station. Contact at 5° is
@@ -177,6 +210,7 @@ What is left is genuinely unsupported, and it is worth knowing where:
 
 Upright, closed, as modelled. Z = 0 is the bed.
 
+- **Brim, plus support under the bottom ~3 mm.** The round bottom demands it.
 - 0.3 mm clearance on every print-in-place gap; 0.4 mm radial on the pin
 - 0.2 mm layers, 3 perimeters. The thinnest structural section is the 1.19 mm
   tip of the latch cantilever.

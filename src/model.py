@@ -8,9 +8,14 @@ Coordinate system
         where the hinge lives; +Y is the FRONT, where the latch lives.
 
 Every cross section normal to Z is a stadium -- two semicircles joined by
-flats.  Both ends are domed with that same profile, so the silhouette is a
-true capsule, symmetric top to bottom, and the cap continues the body's
-surface without a step.
+flats -- and that whole cross section is SCALED to zero over each end, along
+a circular profile whose radius is the body's half width.
+
+That last part is the difference between a lip balm stick and a vape.  If the
+ends are rounded by sweeping the stadium (offsetting it in 3D), the bottom
+comes out flat across the middle with rounded corners, and it reads as a
+tube.  Scaling the section instead makes the front view of each end a true
+semicircle spanning the full width -- a U, not a flat with corners.
 
 The hinge axis is parallel to X.  A positive rotation about it lifts the
 front of the cap.  That sign is the reason only the *rear* of the cap needs
@@ -19,8 +24,8 @@ immediately, while every point behind it sinks and must be given a
 cylindrical underside concentric with the pin.
 """
 
-from math import hypot, pi, cos, sin, radians
-from geom import (smin, smax, sd_stadium_2d, sd_capsule_shell, sd_teardrop,
+from math import hypot, sqrt, radians
+from geom import (smin, smax, sd_stadium_2d, sd_teardrop,
                   sd_box, sd_cyl_x, rot_about_pin)
 
 # ==========================================================================
@@ -35,33 +40,45 @@ BUNDLE_W, BUNDLE_T = STRIP_W, STRIP_N * STRIP_T          # 8.0 x 5.0 mm
 # ---- outer envelope -----------------------------------------------------
 OUT_T = 12.4                       # thickness (Y)
 OUT_W = 21.1                       # width (X)      -> 1.702 : 1
-H_TOTAL = 88.0
+H_TOTAL = 95.0
 R_OUT = OUT_T / 2.0                # 6.20  stadium end radius
 HF_OUT = OUT_W / 2.0 - R_OUT       # 4.35  stadium half flat
+HALF_W = OUT_W / 2.0               # 10.55
 
-BOT_Z = 4.0                        # centre plane of the bottom dome
-TOP_Z = H_TOTAL - R_OUT            # 81.80 centre plane of the top dome
+# Each end is a half ellipsoid: semi-axis HALF_W across the width, R_OUT
+# across the thickness, and BOT_R / TOP_R up the long axis.  Setting those
+# equal to HALF_W makes the front view of each end an exact semicircle.
+BOT_R = HALF_W                     # 10.55
+TOP_R = HALF_W                     # 10.55
+
+# How much is cut off the bottom tip so the part can stand on the bed.
+#   0.00 -> perfectly round, touches the bed at a point, NEEDS SUPPORT
+#   3.09 -> the roundest support-free bottom (45 deg at the bed), 103 mm^2
+BOT_FLAT = 0.0
+
+Z_BOT_C = BOT_R - BOT_FLAT         # centre plane of the bottom dome
+Z_TOP_C = H_TOTAL - TOP_R          # 84.45 centre plane of the top dome
 
 # ---- cavity -------------------------------------------------------------
 CAV_W, CAV_T = 10.8, 7.0
 R_CAV = CAV_T / 2.0                # 3.50
 HF_CAV = CAV_W / 2.0 - R_CAV       # 1.90
-Z_FLOOR = 9.0
+Z_FLOOR = 11.0
 CAV_FILLET = 0.6                   # blends the floor into the walls
 
 # ---- split, neck, skirt -------------------------------------------------
-Z_SPLIT = 76.0
+Z_SPLIT = 75.35
 GAP = 0.3                          # print-in-place clearance everywhere
-Z_BODY_TOP = Z_SPLIT - GAP / 2.0   # 75.85
-Z_CAP_BOT = Z_SPLIT + GAP / 2.0    # 76.15
+Z_BODY_TOP = Z_SPLIT - GAP / 2.0   # 75.20
+Z_CAP_BOT = Z_SPLIT + GAP / 2.0    # 75.50
 SKIRT_T = 2.0                      # cap skirt over the neck
 NECK_INSET = SKIRT_T + GAP         # 2.30
 R_NECK = R_OUT - NECK_INSET        # 3.90
-Z_NECK_TOP = 77.65                 # 1.80 tall, 1.50 of skirt engagement
+Z_NECK_TOP = 77.00                 # 1.80 tall, 1.50 of skirt engagement
 CAP_WALL = 2.2                     # cap wall above the neck
 
 Z_CAV_TOP = Z_NECK_TOP             # strips come out through the neck
-CAV_DEPTH = Z_CAV_TOP - Z_FLOOR    # 68.65
+CAV_DEPTH = Z_CAV_TOP - Z_FLOOR    # 66.00
 
 # The cavity's FRONT wall tapers inward near the top.  That is what buys the
 # neck enough wall to carry a 2.0 mm skirt, which in turn gives the latch
@@ -83,11 +100,11 @@ EAR_HALF = EAR_T / 2.0
 # so pushing the pin further back would break the bore out of the ear -- the
 # exact failure the brief calls out.
 Y_PIN = -2.56
-Z_PIN = 78.60
+Z_PIN = 77.95
 # ear outline extended upward so the bore's 45 degree teardrop roof still
 # leaves EAR_MIN_WALL above it
 EAR_EXT = R_BORE * 1.41421 + EAR_MIN_WALL - EAR_R          # 0.725
-EAR_BOT_Z = 72.0                   # the ear roots this far down into the body
+EAR_BOT_Z = 71.0                   # the ear roots this far down into the body
 
 # The cap's relief where the ears pass through: a cylinder on the pin axis,
 # sized to the ear's corner at the cap's own bottom edge, plus 0.4.
@@ -124,7 +141,7 @@ PIN_X_IN = EAR_X - EAR_HALF - 0.6  # pin reaches past the inner ear face
 # ---- latch --------------------------------------------------------------
 TAB_W = 8.0                        # cantilever width (X)
 TAB_T = 1.8                        # cantilever thickness (Y)
-TAB_ROOT_Z = 66.00
+TAB_ROOT_Z = 65.35
 TAB_TOP_Z = Z_NECK_TOP
 TAB_L = TAB_TOP_Z - TAB_ROOT_Z     # 11.50
 # The bead is a triangular ridge with 45 degree faces, and the groove that
@@ -132,7 +149,7 @@ TAB_L = TAB_TOP_Z - TAB_ROOT_Z     # 11.50
 # unlike a round bead in a shallow V they actually fit each other.
 BEAD_R = 0.75                      # bead proud of the tab face
 BEAD_ENGAGE = BEAD_R - GAP         # 0.45 -- the deflection needed to open
-BEAD_Z = 76.90
+BEAD_Z = 76.25
 BEAD_W = 6.0
 SLOT_W = 0.4                       # slot freeing the cantilever
 GROOVE_GAP = 0.15
@@ -140,13 +157,10 @@ GROOVE_GAP = 0.15
 # ---- keyring ------------------------------------------------------------
 RING_D = 4.5
 R_RING = RING_D / 2.0
-Z_RING = 4.5                       # 2.25 mm of material below the hole
+Z_RING = 6.0                       # 3.75 mm of material below the hole
 
-# ---- knurl --------------------------------------------------------------
-KNURL_N = 28
-KNURL_R = 0.55
-KNURL_DEPTH = 0.35
-KNURL_Z0, KNURL_Z1 = 79.0, 84.0
+# The cap interior tents shut at 45 degrees below this height.
+Z_APEX = 92.5
 
 # ---- material -----------------------------------------------------------
 PLA_DENSITY = 1.24e-3              # g/mm^3
@@ -157,14 +171,44 @@ PLA_E = 3000.0                     # MPa, typical printed PLA
 # shared surfaces
 # ==========================================================================
 
-def outer(p):
-    """The one continuous capsule surface, shared by body and cap."""
-    return sd_capsule_shell(p, HF_OUT, R_OUT, BOT_Z, TOP_Z, R_OUT)
+def profile_scale(z):
+    """How much of the full cross section survives at this height.
+
+    1.0 through the straight middle, falling to 0 at each tip along a
+    circular profile.  Because the WHOLE section scales -- flats and radius
+    together -- the front view of each end is a semicircle of radius BOT_R /
+    TOP_R spanning the full width.  That is the U shape; sweeping the section
+    instead would leave a flat with rounded corners.
+    """
+    if z < Z_BOT_C:
+        t = (Z_BOT_C - z) / BOT_R
+    elif z > Z_TOP_C:
+        t = (z - Z_TOP_C) / TOP_R
+    else:
+        return 1.0
+    if t >= 1.0:
+        return 0.0
+    return sqrt(1.0 - t * t)
 
 
-def spine_dist(x, y):
+def outer(p, grow=0.0):
+    """The one continuous surface, shared by body and cap.
+
+    `grow` offsets it inward, which is how the cap's wall and the neck are
+    derived -- they stay parallel to the skin through the domes, where a
+    fixed cross section would not.
+    """
+    x, y, z = p
+    s = profile_scale(z)
+    if s <= 1e-9:
+        zc = (Z_BOT_C - BOT_R) if z < Z_BOT_C else (Z_TOP_C + TOP_R)
+        return hypot(hypot(x, y), z - zc) + grow
+    return sd_stadium_2d(x, y, HF_OUT * s, R_OUT * s) + grow
+
+
+def spine_dist(x, y, s=1.0):
     """Distance from the stadium spine -- the 'radius' of the oval."""
-    return sd_stadium_2d(x, y, HF_OUT, 0.0)
+    return sd_stadium_2d(x, y, HF_OUT * s, 0.0)
 
 
 def cav_front(z):
@@ -243,24 +287,6 @@ def latch_slot(p):
     return min(side, pocket)
 
 
-def knurl(p):
-    """Shallow vertical flutes on the cap collar (a cutter SDF).  The flutes
-    taper out conically at both ends so they leave no flat ceiling."""
-    z = p[2]
-    if z < KNURL_Z0 - 1.0 or z > KNURL_Z1 + 1.0:
-        return 1e3
-    per_r = R_OUT - KNURL_DEPTH + KNURL_R
-    best = 1e3
-    for i in range(KNURL_N):
-        t = (i + 0.5) / KNURL_N * 2.0 * pi
-        ct, st = cos(t), sin(t)
-        cx = HF_OUT if ct >= 0.0 else -HF_OUT
-        d = hypot(p[0] - (cx + per_r * ct), p[1] - per_r * st) - KNURL_R
-        if d < best:
-            best = d
-    return best + max(0.0, KNURL_Z0 - z, z - KNURL_Z1)
-
-
 def ear_profile(y, z):
     """Ear outline in the plane normal to the pin: a stadium about a vertical
     segment through the pin axis.  Rounded, so nothing square swings near the
@@ -284,7 +310,7 @@ def body(p):
 
     # capsule below the split, plus the neck collar above it
     d = max(outer(p), z - Z_BODY_TOP)
-    neck = max(sd_stadium_2d(x, y, HF_OUT, R_NECK),
+    neck = max(outer(p, NECK_INSET),
                max(Z_BODY_TOP - 0.5 - z, z - Z_NECK_TOP))
     d = smin(d, neck, 0.4)
 
@@ -342,26 +368,29 @@ def body(p):
 # CAP
 # ==========================================================================
 
-def cap_void_radius(z):
-    """Skirt clears the neck below; the wall thickens to CAP_WALL above, over
-    a 45 degree taper so the step is self supporting."""
+def cap_wall(z):
+    """Cap wall thickness: the skirt is thinner, so it clears the neck with
+    GAP to spare; above the neck it thickens to CAP_WALL over a 45 degree
+    taper so the step is self supporting."""
     if z <= Z_NECK_TOP:
-        return R_NECK + GAP                    # 4.20
+        return SKIRT_T                         # inner face lands at R_NECK+GAP
     if z >= Z_NECK_TOP + 1.0:
-        return R_OUT - CAP_WALL                # 4.00
+        return CAP_WALL
     t = z - Z_NECK_TOP
-    return (R_NECK + GAP) * (1.0 - t) + (R_OUT - CAP_WALL) * t
+    return SKIRT_T * (1.0 - t) + CAP_WALL * t
 
 
 def cap(p):
     x, y, z = p
     r_pin = hypot(y - Y_PIN, z - Z_PIN)
-    g = spine_dist(x, y)
 
     d = max(outer(p), Z_CAP_BOT - z)
 
-    # hollow interior with a 45 degree tented roof: nothing bridges mid air
-    void = max(g - cap_void_radius(z), (g - (85.8 - z)) * 0.7071)
+    # Hollow interior.  It is the outer surface offset inward, so the wall
+    # stays parallel to the skin right through the dome; a 45 degree tent
+    # closes it off so nothing bridges mid air.
+    void = max(outer(p, cap_wall(z)),
+               (spine_dist(x, y, profile_scale(z)) - (Z_APEX - z)) * 0.7071)
     void = max(void, Z_CAP_BOT - 4.0 - z)
     d = max(d, -void)
 
@@ -393,7 +422,6 @@ def cap(p):
                 (y - R_NECK) + abs(z - BEAD_Z) - (BEAD_R + GROOVE_GAP))
     d = max(d, -notch)
 
-    d = max(d, -knurl(p))
     return d
 
 
@@ -402,9 +430,9 @@ def cap_nominal(p):
     material, so leaving them out makes the swept envelope conservative."""
     x, y, z = p
     r_pin = hypot(y - Y_PIN, z - Z_PIN)
-    g = spine_dist(x, y)
     d = max(outer(p), Z_CAP_BOT - z)
-    void = max(g - cap_void_radius(z), (g - (85.8 - z)) * 0.7071)
+    void = max(outer(p, cap_wall(z)),
+               (spine_dist(x, y, profile_scale(z)) - (Z_APEX - z)) * 0.7071)
     void = max(void, Z_CAP_BOT - 4.0 - z)
     d = max(d, -void)
     d = max(d, -max(z - Z_PIN, max(y - Y_PIN, R_KNUCK - r_pin)))
@@ -435,6 +463,17 @@ def cap_swept(p):
     """
     if p[1] > SWEEP_Y_MAX or p[2] < 68.0 or p[2] > 86.0:
         return 1e3
+    # Exact short circuit inside an ear band.  The cap's relief there is a
+    # cylinder concentric with the pin, so it is rotation invariant: at any
+    # angle the cap has material only outside R_EAR_RELIEF, or on the pin
+    # stub inside R_PIN.  Both bounds ignore separation along x, so this
+    # under-states the true distance and can only carve more, never less.
+    # Without it every probe near the bore costs 71 cap evaluations.
+    r_pin = hypot(p[1] - Y_PIN, p[2] - Z_PIN)
+    if R_PIN < r_pin < R_EAR_RELIEF:
+        for sx in (-1.0, 1.0):
+            if abs(p[0] - sx * EAR_X) <= EAR_HALF + GAP:
+                return min(r_pin - R_PIN, R_EAR_RELIEF - r_pin)
     best = 1e3
     for a in _SWEEP_ANGLES:
         d = cap_nominal(rot_about_pin(p, Y_PIN, Z_PIN, a))

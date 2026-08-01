@@ -1,9 +1,9 @@
 grid step 0.30 mm
-  body  sample  59.0s  march   6.9s  339086 verts  678204 tris
-  cap   sample   2.1s  march   1.1s   60188 verts  120380 tris
-  volume body  12589.7 mm^3  cap   1248.5 mm^3  total  13838.2
-  mass at 100% infill: 17.16 g
-  wrote 798584 triangles to out/strip_case.stl
+  body  sample  34.3s  march   5.3s  324142 verts  648308 tris
+  cap   sample   1.2s  march   1.3s   87274 verts  174552 tris
+  volume body  11486.8 mm^3  cap   1909.3 mm^3  total  13396.1
+  mass at 100% infill: 16.61 g
+  wrote 822860 triangles to out/strip_case.stl
 
 1. topology
 -----------
@@ -12,7 +12,7 @@ grid step 0.30 mm
 
 2. closed position -- volume intersection
 -----------------------------------------
-  lattice 89 x 57 x 67 at 0.25 mm over the overlap region
+  lattice 89 x 57 x 99 at 0.25 mm over the overlap region
   cells inside BOTH solids: 0  ->  intersection volume 0.0000 mm^3
 
 3. swing test, 0 to 120 deg about the pin axis
@@ -21,7 +21,7 @@ grid step 0.30 mm
 
    angle   hinge hits  deepest    latch hits  note
       0          0      0.0000          0    
-      5          0      0.0000          7    detent releasing (0.12 mm, tab deflects)
+      5          0      0.0000          3    detent releasing (0.12 mm, tab deflects)
      10          0      0.0000          0    
      15          0      0.0000          0    
      20          0      0.0000          0    
@@ -42,43 +42,47 @@ grid step 0.30 mm
      95          0      0.0000          0    
     100          0      0.0000          0    
     105          0      0.0000          0    
-    110         17     -0.0468          0    HINGE INTERFERENCE
-    115        106     -0.3710          0    HINGE INTERFERENCE
-    120        144     -0.6910          0    HINGE INTERFERENCE
+    110         36     -0.1369          0    HINGE INTERFERENCE
+    115         93     -0.5235          0    HINGE INTERFERENCE
+    120        121     -0.9424          0    HINGE INTERFERENCE
 
 4. measurements
 ---------------
-  bed contact area: 150.3 mm^2   (need >= 100)
+  bottom truncation 0.00 mm  ->  bed contact 0.0 mm^2
+        A full 10.55 mm round bottom, as asked for. It meets the bed
+        at a point, so it needs a brim and support under the lowest
+        ~3 mm. BOT_FLAT = 3.09 in model.py gives the roundest
+        support-free bottom instead: 103 mm^2, 45 deg at the bed.
   material between the pin hole and the ear surface: 1.20 mm
         thinnest at 89 deg round the axis, ear at x = -6.0   (need >= 1.2)
-  cavity  10.81 wide x 7.00 thick x 68.65 deep
+  cavity  10.81 wide x 7.00 thick x 66.00 deep
   section at mid strip: 7.01 mm back to front (-3.50 to +3.50)
-  fully enclosed up to z = 74.3; strips reach z = 69.0  -> 5.3 mm of margin
+  fully enclosed up to z = 73.6; strips reach z = 71.0  -> 2.6 mm of margin
   bundle  8.00 wide x 5.00 thick x 60.00 long (10 x 0.5 mm strips)
   clearance at the bundle corners: +0.21 mm, best seating y = +0.00
         (measured above the 0.6 mm fillet at the cavity floor)
-  retrieval margin over the 60 mm strip: 8.65 mm
+  retrieval margin over the 60 mm strip: 6.00 mm
   tab: 8.0 wide x 1.19-3.44 thick x 11.65 long
   bead 0.75 proud, 0.45 engaged past the skirt (0.30 is clearance)
   force to deflect it clear of the groove: 10.1 N   (target 8-12)
   peak surface strain at the root: 0.91 %   (PLA yields near 2-3 %)
-  body  surface samples steeper than 45 deg: 297 of 39115 (0.76 %)
-        (plus 105 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (0.00, -1.55, 7.65)
-  cap   surface samples steeper than 45 deg: 1263 of 39999 (3.16 %)
-        (plus 1522 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-4.44, -5.31, 76.15)
+  body  surface samples steeper than 45 deg: 863 of 39983 (2.16 %)
+        (plus 263 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-1.20, -0.82, 0.17)
+  cap   surface samples steeper than 45 deg: 1667 of 39999 (4.17 %)
+        (plus 1029 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-4.21, -5.27, 75.50)
 
 5. mass
 -------
-  body 12589.7 mm^3, cap 1248.5 mm^3, total 13838.2 mm^3
-  PLA at 1.24 g/cm^3, 100% infill: 17.16 g
+  body 11486.8 mm^3, cap 1909.3 mm^3, total 13396.1 mm^3
+  PLA at 1.24 g/cm^3, 100% infill: 16.61 g
 
 summary
 -------
   topology ok        : True
   closed-position hits: 0
   swing stations with interference: 3
-     110 deg: 17 points, -0.047 mm
-     115 deg: 106 points, -0.371 mm
-     120 deg: 144 points, -0.691 mm
+     110 deg: 36 points, -0.137 mm
+     115 deg: 93 points, -0.524 mm
+     120 deg: 121 points, -0.942 mm

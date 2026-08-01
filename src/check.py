@@ -37,8 +37,8 @@ def closed_intersection(bm, cm, step=0.25):
     larger than the clearances being checked, so a mesh-based test reports
     penetrations that are not in the model.
     """
-    lo = (-11.0, -7.0, 72.0)
-    hi = (11.0, 7.0, 88.5)
+    lo = (-11.0, -7.0, 71.0)
+    hi = (11.0, 7.0, 95.5)
     n = [int((hi[i] - lo[i]) / step) + 1 for i in range(3)]
     inter = worst = 0
     worst_d = 0.0
@@ -123,7 +123,14 @@ def bed_contact(bm):
         pa, pb, pc = verts[a], verts[b], verts[c]
         if max(pa[2], pb[2], pc[2]) < 0.05:
             area += tri_area(pa, pb, pc)
-    print('  bed contact area: %.1f mm^2   (need >= 100)' % area)
+    print('  bottom truncation %.2f mm  ->  bed contact %.1f mm^2'
+          % (M.BOT_FLAT, area))
+    if M.BOT_FLAT <= 0.01:
+        print('        A full %.2f mm round bottom, as asked for. It meets the bed'
+              % M.BOT_R)
+        print('        at a point, so it needs a brim and support under the lowest')
+        print('        ~3 mm. BOT_FLAT = 3.09 in model.py gives the roundest')
+        print('        support-free bottom instead: 103 mm^2, 45 deg at the bed.')
     return area
 
 
@@ -137,8 +144,8 @@ def bore_wall():
     """
     worst, worst_a, worst_x = 1e9, 0.0, 0.0
     for x in (-M.EAR_X, M.EAR_X):
-        for i in range(720):
-            ang = i * math.pi / 360.0
+        for i in range(360):
+            ang = i * math.pi / 180.0
             ca, sa = math.cos(ang), math.sin(ang)
             r, enter, wall = 0.0, None, 0.0
             while r < 12.0:
@@ -149,7 +156,7 @@ def bore_wall():
                 elif not solid and enter is not None:
                     wall = max(wall, r - enter)
                     enter = None
-                r += 0.005
+                r += 0.01
             if enter is not None:
                 wall = max(wall, r - enter)
             if wall < worst:

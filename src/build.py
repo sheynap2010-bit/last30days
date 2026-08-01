@@ -6,8 +6,8 @@ import model as M
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'out')
 
-BODY_BOX = ((-11.0, -7.0, -1.0), (11.0, 7.0, 84.5))
-CAP_BOX = ((-11.0, -7.0, 75.0), (11.0, 7.0, 89.0))
+BODY_BOX = ((-11.0, -7.0, -1.0), (11.0, 7.0, 83.0))
+CAP_BOX = ((-11.0, -7.0, 74.0), (11.0, 7.0, 96.0))
 
 
 def build(fn, box, step, name):
