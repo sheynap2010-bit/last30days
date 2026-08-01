@@ -10,6 +10,7 @@ src/build.py            polygonise and export
 src/check.py            verification; every number in the report comes from here
 src/diag.py             locates what check.py counts
 src/build123d_model.py  B-rep transcription for STEP export (NEVER RUN — see below)
+src/blender_setup.py    builds the .blend inside Blender (NEVER RUN — see below)
 out/                    STL, OBJ, verification log
 ```
 
@@ -97,9 +98,25 @@ the proxy. So:
   `src/build123d_model.py` is a faithful transcription that exports STEP, but
   **it has never been executed** and should be treated as unrun source. It
   imports its parameters from `model.py` so the two cannot drift.
-- **No .blend.** Blender and `bpy` are not installed and could not be fetched.
-  `out/strip_case.obj` carries the two solids as named objects (`body`, `cap`)
-  and imports into Blender in one step.
+- **No .blend.** Blender and `bpy` are not installed and could not be fetched,
+  and a `.blend` is a binary dump of Blender's internal structures — not
+  something worth hand-writing blind. Instead, one command on a machine that
+  has Blender produces it:
+
+  ```
+  blender --background --python src/blender_setup.py     # writes out/strip_case.blend
+  ```
+
+  That script does more than import the mesh. It sets the scene to
+  millimetres, and it moves the cap's origin onto the hinge pin axis
+  (y = −2.56, z = 78.60) with a rotation limit of 0–105° on X — so the cap
+  articulates about the real hinge instead of the world origin, over exactly
+  the range the swing test cleared. It has also never been run; it is
+  defensive about the operators Blender renamed in 3.3 and 4.2.
+
+  If you would rather do it by hand, `out/strip_case.obj` carries the two
+  solids as named objects (`body`, `cap`) and imports in one step — but the
+  cap will pivot about the world origin until you move its origin yourself.
 
 The STL is the verified deliverable. It comes from `model.py`, and `check.py`
 runs against the same functions the STL was generated from.
