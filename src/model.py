@@ -77,9 +77,19 @@ CAV_FILLET = 0.6
 
 # ---- split, neck, skirt -------------------------------------------------
 Z_SPLIT = 76.35
-GAP = 0.3                          # print-in-place clearance everywhere
+GAP = 0.3                          # clearance across VERTICAL faces
+
+# Clearance across HORIZONTAL faces has to be bigger, and this is the single
+# thing most likely to weld the cap to the body.  A vertical gap is safe at
+# 0.3 mm because the nozzle simply never enters it.  A horizontal gap is not:
+# the layer above it is laid down over air, and at 0.3 mm with 0.2 mm layers
+# that is 1.5 layers -- the cap's first layer lands almost on the body's top
+# face and fuses to it.  0.6 mm is three layers at 0.20 and four at 0.15, so
+# at least two are fully empty.
+SPLIT_GAP = 0.6
+
 Z_BODY_TOP = Z_SPLIT - GAP / 2.0   # 76.20
-Z_CAP_BOT = Z_SPLIT + GAP / 2.0    # 76.50
+Z_CAP_BOT = Z_BODY_TOP + SPLIT_GAP # 76.80
 SKIRT_T = 2.0
 NECK_INSET = SKIRT_T + GAP         # 2.30
 R_NECK = R_OUT - NECK_INSET        # 6.70  -> 1.30 mm of neck wall at the sides
@@ -119,7 +129,9 @@ EAR_HALF = EAR_T / 2.0
 # every opening angle -- the recess is simply that cylinder plus clearance.
 R_LUG = R_PIN + EAR_MIN_WALL       # 2.55
 LUG_HALF_X = 2.8
-RECESS_R = R_LUG + GAP             # 2.85
+RECESS_R = R_LUG + 0.5             # 3.05 -- the lug's underside is a
+                                   # horizontal interface, so it gets the
+                                   # larger clearance too
 RECESS_HALF_X = LUG_HALF_X + GAP   # 3.10
 LUG_BACK = Y_PIN - R_LUG           # -11.70, the boss's outermost face
 # The strap must clear the body's skin where it passes it, but ABOVE the body
@@ -142,7 +154,18 @@ BEAD_R = 0.75
 BEAD_ENGAGE = BEAD_R - GAP         # 0.45
 BEAD_Z = 77.25
 BEAD_W = 6.0
-SLOT_W = 0.4
+# The slot has to stay UNDER the strip thickness, because it runs from the
+# cap's interior down past the tab and out through the skin -- at 0.6 mm a
+# 0.5 mm strip walks straight out of it.  0.45 blocks the strip and is a
+# vertical gap, which is far more forgiving to print than a horizontal one:
+# the nozzle never passes over it.  Disable gap-fill in the slicer so it does
+# not try to bridge it with a thin extrusion.
+SLOT_W = 0.45
+# The slot and the pocket behind the tab both stop 1.0 mm short of the cavity
+# wall, leaving a membrane between them.  Without it the slot is an open
+# channel from the cavity to the outside -- and at 0.6 mm it is wide enough
+# for a 0.5 mm strip to walk out through.
+POCKET_Y_IN = R_CAV + 1.0          # 4.50
 GROOVE_GAP = 0.15
 
 # ---- keyring ------------------------------------------------------------
@@ -235,11 +258,12 @@ def latch_slot(p):
     hw = TAB_W / 2.0
     zc = (TAB_ROOT_Z + TAB_TOP_Z + 6.0) / 2.0
     zh = (TAB_TOP_Z + 6.0 - TAB_ROOT_Z) / 2.0
-    side = min(sd_box(p, hw + SLOT_W / 2.0, 7.0, zc, SLOT_W / 2.0, 4.0, zh),
-               sd_box(p, -hw - SLOT_W / 2.0, 7.0, zc, SLOT_W / 2.0, 4.0, zh))
-    y_in = cav_front(z) - 0.3
+    yc = (POCKET_Y_IN + 12.0) / 2.0
+    yh = (12.0 - POCKET_Y_IN) / 2.0
+    side = min(sd_box(p, hw + SLOT_W / 2.0, yc, zc, SLOT_W / 2.0, yh, zh),
+               sd_box(p, -hw - SLOT_W / 2.0, yc, zc, SLOT_W / 2.0, yh, zh))
     y_out = tab_inner(z)
-    pocket = max(max(abs(x) - hw, max(y_in - y, y - y_out)),
+    pocket = max(max(abs(x) - hw, max(POCKET_Y_IN - y, y - y_out)),
                  max(TAB_ROOT_Z - z, z - (TAB_TOP_Z + 6.0)))
     return min(side, pocket)
 
