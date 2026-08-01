@@ -29,80 +29,56 @@ and runs every check.
 
 | | |
 |---|---|
-| Envelope | 21.1 W × 12.4 T × 96 H mm — stadium section, 1.70 : 1 |
-| Ends | half-ellipsoids, R10.55 in front view — a true U, not a swept flat |
+| Envelope | **Ø18 × 94 mm** — a cylinder with hemispherical ends |
 | Cavity | 10.8 × 7.0 stadium, 66.5 deep |
-| Wall | 2.7 mm around the cavity, 2.2 mm cap, 2.0 mm skirt |
-| Hinge | Ø2.7 captive pins on the cap, Ø3.5 bores in two body ears at x = ±6 |
+| Wall | 3.6 mm at the sides, 5.5 mm front and back, 2.2 mm cap |
+| Hinge | **external** — Ø2.7 captive pins on a cap lug, Ø3.5 bores in two body ears |
 | Latch | 8 × 1.8 × 11.65 mm cantilever, 45° bead into a matching 45° groove |
-| Keyring | Ø7.0 through the bottom dome, axis along the thickness |
-| Mass | 17.0 g in PLA at 100% infill |
+| Keyring | Ø7.0 through the bottom dome |
+| Mass | 19.9 g in PLA at 100% infill |
 
-Coordinates: Z is the long axis with Z=0 on the bed, X is the wide direction,
-−Y is the back (hinge), +Y is the front (latch).
+Coordinates: Z is the long axis with Z=0 on the bed, −Y is the back (hinge),
++Y is the front (latch).
 
-## The end shape — the thing that decides whether it reads as a vape
+The cross-section machinery is the same one that drew the earlier flat oval —
+a stadium scaled to zero over each end along a circular profile. Setting the
+width equal to the thickness collapses the stadium to a circle, so one code
+path gives a true cylinder with domed ends and no special casing.
 
-Both ends scale the *whole* stadium cross section to zero along a circular
-profile whose radius is the body's half width. The front view of each end is
-therefore an exact semicircle spanning the full width: a **U**.
+## Why the hinge is outside the skin — and why that seals the case
 
-The obvious alternative — sweeping the stadium, i.e. offsetting it in 3D —
-gives a bottom that is flat across the middle with rounded corners. That is
-what the first version did, and it read unmistakably as a tube. It is a
-different surface, not a smaller radius, and no amount of filleting fixes it.
+Opening rotates the cap about the pin, and **every point of the cap behind
+the pin sinks as it rotates.** With the pin buried in the back wall the cap's
+whole rear skin is behind it, so the body had to be hollowed out of its way —
+and that hollow was a 2 mm slot from the cavity to open air, wide enough for
+a 0.5 mm strip to escape. Four fixes were built and measured against that,
+and all four failed:
 
-**The cost: a true U cannot print support-free standing up.** The bottom is
-tangent to the bed at a single point, and the last few millimetres overhang
-past 45°. Measured on the R10.55 bottom:
+| attempted fix | result |
+|---|---|
+| Full-size knuckle, cut back only at the ears | closes the split line, not the pocket — 2.45 mm |
+| Cap tongue reaching into the pocket | seals it, but collides with the rim from 40° to 70° |
+| Internal plug entering the bore | cannot print — its first layer is over 66 mm of air |
+| Less opening angle | 100°: 2.02, 85°: 1.18, then **floors at 1.09 mm** down to 50° |
 
-| cut off the tip | bed contact | wall angle at the bed |
-|---|---|---|
-| 0.00 mm (a true U) | a point | 90° |
-| 1.00 mm | 37 mm² | 65° |
-| 2.00 mm | 71 mm² | 54° |
-| **3.09 mm** | **103 mm²** | **45° — the support-free limit** |
+Moving the pin 0.15 mm **behind** the skin puts every point of the cap in
+front of it. Everything rises on opening, nothing sweeps into the body, and
+the split closes to its 0.3 mm print clearance the whole way round. The neck
+survives as a complete 360° collar, which is what actually seals the bore.
 
-3.09 mm off a 10.55 mm dome leaves a round-over, not a U — which is the shape
-that was rejected. So the model ships at `BOT_FLAT = 0.0`: fully round, print
-with a brim and support under the lowest ~3 mm. One line in `model.py`
-(`BOT_FLAT = 3.09`) switches to the support-free bottom if you change your
-mind.
+That leaves only the cap's own lug, which hangs down behind the pin. It is
+bounded by a cylinder on the pin axis, and radius is invariant under
+rotation, so its swept envelope *is* that cylinder at every angle — the body
+just carries a matching cylindrical recess. The recess is 3.0 mm deep into a
+5.5 mm back wall: a dish in the outer surface, not a hole into the cavity.
 
-This is the one place this design knowingly breaks the original brief's "no
-support material".
-
-## How it is modelled, and why not with booleans
-
-Everything is a signed distance function composed analytically. A fillet is a
-smooth-min, evaluated on the surface itself — a real constant-radius blend, not
-a mesh operation. Two things follow:
-
-- **Collision tests are exact.** Asking whether a point is inside the body is
-  one function evaluation. No ray casting, no tessellation error in the
-  answer. The swing test and the intersection test are done on the functions,
-  not on the meshes.
-- **The rear hinge relief is swept, not guessed.** `cap_swept()` returns the
-  cap's closest approach to a point over the whole 0–105° opening range, and
-  the body subtracts it. Three hand-derived relief radii failed before this;
-  the swept envelope is correct by construction.
-
-Marching tetrahedra (not cubes) polygonises the result: 16 cases instead of
-256, watertight by construction because vertices are keyed by lattice edge.
-
-It then gets one pass of `smooth_project()`. Marching tetrahedra puts each
-vertex wherever a lattice edge happens to cross the surface, which leaves
-slivers and an uneven distribution — and *that*, not the grid pitch, is what
-makes a curved surface look faceted under shading. The pass relaxes each
-vertex toward its neighbours and then Newton-steps it back onto the exact
-isosurface along the SDF gradient, so the triangles improve while every
-vertex still lies on the true surface. Vertices on a crease are held still,
-so the split line, the latch slot and the flats stay sharp.
-
-Creases are detected from *area-weighted* face normals. Weighting matters: an
-unweighted average lets sliver triangles, whose normals are numerical noise,
-masquerade as creases — the first attempt flagged 85 % of the surface and the
-smoothing did nothing.
+**Consequences.** The model needs no swept-envelope subtraction, no dish and
+no knuckle cut; every hinge clearance is now an explicit cylinder on the
+axis. The swing test is clean across the *entire* 0–120° sweep rather than
+stopping at 100°, and the cap's steep-overhang area dropped from 4.2 % to
+0.9 % because all that relief geometry is gone. The cost is visual: the ears
+stand 3.1 mm proud of the barrel and the cap's lug 2.7 mm, like a real
+flip-top lip balm.
 
 ## Deviations from the brief, and why
 

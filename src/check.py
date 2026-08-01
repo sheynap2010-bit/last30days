@@ -37,8 +37,8 @@ def closed_intersection(bm, cm, step=0.25):
     larger than the clearances being checked, so a mesh-based test reports
     penetrations that are not in the model.
     """
-    lo = (-11.0, -7.0, 72.0)
-    hi = (11.0, 7.0, 96.5)
+    lo = (-11.0, -13.0, 72.0)
+    hi = (11.0, 9.0, 94.5)
     n = [int((hi[i] - lo[i]) / step) + 1 for i in range(3)]
     inter = worst = 0
     worst_d = 0.0
@@ -125,8 +125,8 @@ def containment(step=0.25, radii=(0.25, 0.4, 0.6)):
     object of diameter 2r could follow that path out.  A strip is 0.5 mm
     thick, so the r = 0.25 fill is the one that matters.
     """
-    lo = (-11.0, -7.0, 68.0)
-    hi = (11.0, 7.0, 84.0)
+    lo = (-11.0, -13.0, 66.0)
+    hi = (11.0, 9.0, 84.0)
     n = [int((hi[i] - lo[i]) / step) + 1 for i in range(3)]
     print('  lattice %d x %d x %d at %.2f mm' % (n[0], n[1], n[2], step))
 
@@ -323,7 +323,7 @@ def tab_thickness(z):
     """Measure the free tab where the model actually built it: walk out along
     +Y at x = 0 and take the last continuous run of material."""
     runs, cur, y = [], None, 0.0
-    while y < 7.0:
+    while y < M.R_OUT + 1.0:
         inside = M.body((0.0, y, z)) < 0.0
         if inside and cur is None:
             cur = y
