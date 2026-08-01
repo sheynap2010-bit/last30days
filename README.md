@@ -33,7 +33,7 @@ and runs every check.
 | Cavity | 10.8 × 7.0 stadium, 66.5 deep |
 | Wall | 3.6 mm at the sides, 5.5 mm front and back, 2.2 mm cap |
 | Hinge | **external** — Ø2.7 captive pins on a cap lug, Ø3.5 bores in two body ears |
-| Latch | 8 × 1.8 × 11.65 mm cantilever, 45° bead into a matching 45° groove |
+| Latch | 8 × 1.8 × 11.65 mm cantilever, filleted root, 45° bead into a 45° groove |
 | Keyring | Ø7.0 through the bottom dome |
 | Mass | 19.9 g in PLA at 100% infill |
 
@@ -138,6 +138,33 @@ grows it outward — it cut the bridged area from 101 mm² to 57 mm².
 
 For the full hemisphere instead, set `BOT_FLAT = 0.0` in `model.py` and
 rebuild. It then needs a brim and support under the lowest ~3 mm.
+
+### The latch
+
+| | |
+|---|---|
+| force to deflect the tab 0.45 mm | 10.9 N |
+| **force at your thumb to open** | **~18 N (1.8 kgf)** |
+| force holding it shut | the same — the bead's faces are symmetric |
+| peak nominal strain | 0.89 % at z = 67.4, above the fillet |
+
+The opening force is not the deflection force. The bead's 45° face is a cam,
+so releasing it costs `F(μ + tan45°)/(1 − μ·tan45°)` — about 1.86× with PLA on
+PLA — and the hinge lever trims it slightly. This is firmer than the 8–12 N
+the brief asked for; it will not open in a pocket. To soften it, take `TAB_T`
+from 1.8 to about 1.5 mm.
+
+**The root is filleted, and that matters more than the numbers suggest.** Peak
+bending strain sits just above the fillet, not at the root — strain goes as
+x/t², so the thickest section is not the worst one. The fillet barely changes
+that nominal 0.89 %. What it removes is the *stress concentration*: a square
+internal corner on a flexing feature runs Kt ≈ 2.5, and a 1.2 mm fillet on a
+1.8 mm section brings it to roughly 1.3. On a notch-sensitive material like
+PLA that is the difference between a part that survives a few hundred
+open/close cycles and one that cracks at the corner.
+
+The slots get a smaller 0.35 mm fillet — anything approaching their 0.45 mm
+width would close them up and weld the tab to the body.
 
 ### First open
 

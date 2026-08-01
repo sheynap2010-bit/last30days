@@ -1,9 +1,9 @@
 grid step 0.30 mm
-  body  sample  23.1s  march  11.0s  smooth  29.9s  358418 verts (73706 relaxed)  716844 tris
-  cap   sample   3.1s  march   2.2s  smooth   3.5s   87896 verts (17338 relaxed)  175788 tris
-  volume body  14156.2 mm^3  cap   2409.4 mm^3  total  16565.6
-  mass at 100% infill: 20.54 g
-  wrote 892632 triangles to out/strip_case.stl
+  body  sample  17.7s  march   9.6s  smooth  23.4s  358264 verts (74036 relaxed)  716536 tris
+  cap   sample   2.4s  march   1.8s  smooth   2.5s   87896 verts (17338 relaxed)  175788 tris
+  volume body  14131.2 mm^3  cap   2409.4 mm^3  total  16540.6
+  mass at 100% infill: 20.51 g
+  wrote 892324 triangles to out/strip_case.stl
 
 1. topology
 -----------
@@ -70,19 +70,19 @@ grid step 0.30 mm
   retrieval margin over the 60 mm strip: 6.50 mm
   tab: 8.0 wide x 1.80-4.01 thick x 11.65 long
   bead 0.75 proud, 0.45 engaged past the skirt (0.30 is clearance)
-  force to deflect it clear of the groove: 10.1 N   (target 8-12)
-  peak surface strain at the root: 0.92 %   (PLA yields near 2-3 %)
-  body  surface samples steeper than 45 deg: 370 of 39286 (0.94 %)
-        (plus 46 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-5.54, -9.15, 74.96)
+  force to deflect it clear of the groove: 10.9 N   (target 8-12)
+  peak surface strain at the root: 0.48 %   (PLA yields near 2-3 %)
+  body  surface samples steeper than 45 deg: 363 of 39283 (0.92 %)
+        (plus 45 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 89 deg at (0.00, -3.21, 10.72)
   cap   surface samples steeper than 45 deg: 1481 of 40000 (3.70 %)
         (plus 264 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
         worst 90 deg at (-1.15, -7.99, 76.83)
 
 6. mass
 -------
-  body 14156.2 mm^3, cap 2409.4 mm^3, total 16565.6 mm^3
-  PLA at 1.24 g/cm^3, 100% infill: 20.54 g
+  body 14131.2 mm^3, cap 2409.4 mm^3, total 16540.6 mm^3
+  PLA at 1.24 g/cm^3, 100% infill: 20.51 g
 
 summary
 -------

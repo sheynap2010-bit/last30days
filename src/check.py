@@ -357,17 +357,29 @@ def latch():
         x = M.TAB_TOP_Z - z
         compl += x * x / (M.PLA_E * I) * dz
     F = M.BEAD_ENGAGE / compl
-    t_root = ts[0]
-    I_root = M.TAB_W * t_root ** 3 / 12.0
-    strain = (F * M.TAB_L) * (t_root / 2.0) / (M.PLA_E * I_root)
+    # Peak strain is NOT at the root.  With a fillet there the root is the
+    # thickest section, and strain goes as x/t^2 -- so the worst point sits
+    # just above the fillet, where the section is thin but the moment is
+    # already large.  Take the maximum over the whole length.
+    strain, strain_z = 0.0, 0.0
+    for i, t in enumerate(ts):
+        if t <= 0.0:
+            continue
+        z = M.TAB_ROOT_Z + (i + 0.5) * dz
+        x = M.TAB_TOP_Z - z
+        e = 6.0 * F * x / (M.PLA_E * M.TAB_W * t * t)
+        if e > strain:
+            strain, strain_z = e, z
     live = [t for t in ts if t > 0]
     print('  tab: %.1f wide x %.2f-%.2f thick x %.2f long'
           % (M.TAB_W, min(live), max(live), M.TAB_L))
     print('  bead %.2f proud, %.2f engaged past the skirt (%.2f is clearance)'
           % (M.BEAD_R, M.BEAD_ENGAGE, M.GAP))
     print('  force to deflect it clear of the groove: %.1f N   (target 8-12)' % F)
-    print('  peak surface strain at the root: %.2f %%   (PLA yields near 2-3 %%)'
-          % (strain * 100.0))
+    print('  peak surface strain: %.2f %% at z = %.1f   (PLA yields near 2-3 %%)'
+          % (strain * 100.0, strain_z))
+    print('        nominal beam figure -- it excludes the stress concentration')
+    print('        at the root, which is what the fillet is there to remove')
     return F, strain
 
 

@@ -176,6 +176,16 @@ SLOT_W = 0.45
 # channel from the cavity to the outside -- and at 0.6 mm it is wide enough
 # for a 0.5 mm strip to walk out through.
 POCKET_Y_IN = R_CAV + 1.0          # 4.50
+
+# Fillets where the tab meets the body.  A cantilever's bending stress peaks
+# at the root, and the pocket and slots used to arrive there as square
+# internal corners -- a notch on the exact face that sees peak tension, on a
+# feature that flexes every time the case is opened.  PLA is notch sensitive,
+# so that corner is where a fatigue crack would start.  The pocket gets the
+# large radius; the slots get a small one, because a fillet bigger than the
+# 0.45 mm slot would close the slot up and weld the tab to the body.
+ROOT_FILLET = 1.2
+SLOT_FILLET = 0.35
 GROOVE_GAP = 0.15
 
 # ---- keyring ------------------------------------------------------------
@@ -268,13 +278,21 @@ def latch_slot(p):
     hw = TAB_W / 2.0
     zc = (TAB_ROOT_Z + TAB_TOP_Z + 6.0) / 2.0
     zh = (TAB_TOP_Z + 6.0 - TAB_ROOT_Z) / 2.0
-    yc = (POCKET_Y_IN + 12.0) / 2.0
-    yh = (12.0 - POCKET_Y_IN) / 2.0
-    side = min(sd_box(p, hw + SLOT_W / 2.0, yc, zc, SLOT_W / 2.0, yh, zh),
-               sd_box(p, -hw - SLOT_W / 2.0, yc, zc, SLOT_W / 2.0, yh, zh))
+    ztop = TAB_TOP_Z + 6.0
+
+    # side slots, their bottom corners lightly rounded
+    side = 1e9
+    for sx in (-1.0, 1.0):
+        w = max(abs(x - sx * (hw + SLOT_W / 2.0)) - SLOT_W / 2.0,
+                max(POCKET_Y_IN - y, y - 12.0))
+        w = smax(w, TAB_ROOT_Z - z, SLOT_FILLET)
+        side = min(side, max(w, z - ztop))
+
+    # pocket behind the tab, with a proper fillet into the root
     y_out = tab_inner(z)
-    pocket = max(max(abs(x) - hw, max(POCKET_Y_IN - y, y - y_out)),
-                 max(TAB_ROOT_Z - z, z - (TAB_TOP_Z + 6.0)))
+    pocket = max(abs(x) - hw, max(POCKET_Y_IN - y, y - y_out))
+    pocket = smax(pocket, TAB_ROOT_Z - z, ROOT_FILLET)
+    pocket = max(pocket, z - ztop)
     return min(side, pocket)
 
 
