@@ -11,7 +11,11 @@ src/check.py            verification; every number in the report comes from here
 src/diag.py             locates what check.py counts
 src/build123d_model.py  B-rep transcription for STEP export (NEVER RUN — see below)
 src/blender_setup.py    builds the .blend inside Blender (NEVER RUN — see below)
-out/                    STL, OBJ, verification log
+out/strip_case.stl      both parts, closed, print-in-place — this is the print
+out/strip_case_body.stl,
+out/strip_case_cap.stl  the same two solids split out, world coordinates
+out/strip_case.obj      both solids as named objects, for Blender
+out/verification.txt    the full check output
 ```
 
 Regenerate: `cd src && python3 check.py 0.3` (no dependencies, stdlib only).
