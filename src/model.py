@@ -40,7 +40,7 @@ BUNDLE_W, BUNDLE_T = STRIP_W, STRIP_N * STRIP_T          # 8.0 x 5.0 mm
 # ---- outer envelope -----------------------------------------------------
 OUT_T = 12.4                       # thickness (Y)
 OUT_W = 21.1                       # width (X)      -> 1.702 : 1
-H_TOTAL = 95.0
+H_TOTAL = 96.0
 R_OUT = OUT_T / 2.0                # 6.20  stadium end radius
 HF_OUT = OUT_W / 2.0 - R_OUT       # 4.35  stadium half flat
 HALF_W = OUT_W / 2.0               # 10.55
@@ -63,18 +63,18 @@ Z_TOP_C = H_TOTAL - TOP_R          # 84.45 centre plane of the top dome
 CAV_W, CAV_T = 10.8, 7.0
 R_CAV = CAV_T / 2.0                # 3.50
 HF_CAV = CAV_W / 2.0 - R_CAV       # 1.90
-Z_FLOOR = 11.0
+Z_FLOOR = 11.5
 CAV_FILLET = 0.6                   # blends the floor into the walls
 
 # ---- split, neck, skirt -------------------------------------------------
-Z_SPLIT = 75.35
+Z_SPLIT = 76.35
 GAP = 0.3                          # print-in-place clearance everywhere
 Z_BODY_TOP = Z_SPLIT - GAP / 2.0   # 75.20
 Z_CAP_BOT = Z_SPLIT + GAP / 2.0    # 75.50
 SKIRT_T = 2.0                      # cap skirt over the neck
 NECK_INSET = SKIRT_T + GAP         # 2.30
 R_NECK = R_OUT - NECK_INSET        # 3.90
-Z_NECK_TOP = 77.00                 # 1.80 tall, 1.50 of skirt engagement
+Z_NECK_TOP = 78.00                 # 1.80 tall, 1.50 of skirt engagement
 CAP_WALL = 2.2                     # cap wall above the neck
 
 Z_CAV_TOP = Z_NECK_TOP             # strips come out through the neck
@@ -84,7 +84,7 @@ CAV_DEPTH = Z_CAV_TOP - Z_FLOOR    # 66.00
 # neck enough wall to carry a 2.0 mm skirt, which in turn gives the latch
 # groove 1.45 mm of cap wall behind it.  The opening still measures 6.25 mm
 # back to front against a 5.0 mm bundle, so the strips clear it.
-CAV_FRONT_LO, CAV_FRONT_HI = 68.0, Z_BODY_TOP
+CAV_FRONT_LO, CAV_FRONT_HI = 69.0, Z_BODY_TOP
 CAV_FRONT_TOP = 2.75
 
 # ---- hinge --------------------------------------------------------------
@@ -100,11 +100,11 @@ EAR_HALF = EAR_T / 2.0
 # so pushing the pin further back would break the bore out of the ear -- the
 # exact failure the brief calls out.
 Y_PIN = -2.56
-Z_PIN = 77.95
+Z_PIN = 78.95
 # ear outline extended upward so the bore's 45 degree teardrop roof still
 # leaves EAR_MIN_WALL above it
 EAR_EXT = R_BORE * 1.41421 + EAR_MIN_WALL - EAR_R          # 0.725
-EAR_BOT_Z = 71.0                   # the ear roots this far down into the body
+EAR_BOT_Z = 72.0                   # the ear roots this far down into the body
 
 # The cap's relief where the ears pass through: a cylinder on the pin axis,
 # sized to the ear's corner at the cap's own bottom edge, plus 0.4.
@@ -141,7 +141,7 @@ PIN_X_IN = EAR_X - EAR_HALF - 0.6  # pin reaches past the inner ear face
 # ---- latch --------------------------------------------------------------
 TAB_W = 8.0                        # cantilever width (X)
 TAB_T = 1.8                        # cantilever thickness (Y)
-TAB_ROOT_Z = 65.35
+TAB_ROOT_Z = 66.35
 TAB_TOP_Z = Z_NECK_TOP
 TAB_L = TAB_TOP_Z - TAB_ROOT_Z     # 11.50
 # The bead is a triangular ridge with 45 degree faces, and the groove that
@@ -149,18 +149,18 @@ TAB_L = TAB_TOP_Z - TAB_ROOT_Z     # 11.50
 # unlike a round bead in a shallow V they actually fit each other.
 BEAD_R = 0.75                      # bead proud of the tab face
 BEAD_ENGAGE = BEAD_R - GAP         # 0.45 -- the deflection needed to open
-BEAD_Z = 76.25
+BEAD_Z = 77.25
 BEAD_W = 6.0
 SLOT_W = 0.4                       # slot freeing the cantilever
 GROOVE_GAP = 0.15
 
 # ---- keyring ------------------------------------------------------------
-RING_D = 4.5
+RING_D = 7.0
 R_RING = RING_D / 2.0
-Z_RING = 6.0                       # 3.75 mm of material below the hole
+Z_RING = 5.8                       # 2.30 mm of material below the hole
 
 # The cap interior tents shut at 45 degrees below this height.
-Z_APEX = 92.5
+Z_APEX = 93.5
 
 # ---- material -----------------------------------------------------------
 PLA_DENSITY = 1.24e-3              # g/mm^3
@@ -461,7 +461,7 @@ def cap_swept(p):
     front of the cap rises away on opening and never needs body relief, and
     the gate keeps the latch bead out of its own groove's way.
     """
-    if p[1] > SWEEP_Y_MAX or p[2] < 68.0 or p[2] > 86.0:
+    if p[1] > SWEEP_Y_MAX or p[2] < 69.0 or p[2] > 87.0:
         return 1e3
     # Exact short circuit inside an ear band.  The cap's relief there is a
     # cylinder concentric with the pin, so it is rotation invariant: at any

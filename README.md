@@ -16,7 +16,9 @@ out/strip_case_body.stl,
 out/strip_case_cap.stl  the same two solids split out, world coordinates
 out/strip_case.obj      both solids as named objects, for Blender
 out/verification.txt    the full check output
-out/views.png           front closed, side closed, side open at 105 deg
+out/render.png          shaded 3/4 view, closed and open at 105 deg
+out/views.png           flat silhouettes: front, side, side open
+out/strip_case_stl.zip  all three STLs, compressed
 ```
 
 Regenerate: `cd src && python3 check.py 0.3` (no dependencies, stdlib only).
@@ -27,14 +29,14 @@ and runs every check.
 
 | | |
 |---|---|
-| Envelope | 21.1 W × 12.4 T × 95 H mm — stadium section, 1.70 : 1 |
+| Envelope | 21.1 W × 12.4 T × 96 H mm — stadium section, 1.70 : 1 |
 | Ends | half-ellipsoids, R10.55 in front view — a true U, not a swept flat |
-| Cavity | 10.8 × 7.0 stadium, 66.0 deep |
+| Cavity | 10.8 × 7.0 stadium, 66.5 deep |
 | Wall | 2.7 mm around the cavity, 2.2 mm cap, 2.0 mm skirt |
 | Hinge | Ø2.7 captive pins on the cap, Ø3.5 bores in two body ears at x = ±6 |
 | Latch | 8 × 1.8 × 11.65 mm cantilever, 45° bead into a matching 45° groove |
-| Keyring | Ø4.5 through the bottom dome, axis along the thickness |
-| Mass | 16.6 g in PLA at 100% infill |
+| Keyring | Ø7.0 through the bottom dome, axis along the thickness |
+| Mass | 17.0 g in PLA at 100% infill |
 
 Coordinates: Z is the long axis with Z=0 on the bed, X is the wide direction,
 −Y is the back (hinge), +Y is the front (latch).
@@ -88,6 +90,20 @@ a mesh operation. Two things follow:
 Marching tetrahedra (not cubes) polygonises the result: 16 cases instead of
 256, watertight by construction because vertices are keyed by lattice edge.
 
+It then gets one pass of `smooth_project()`. Marching tetrahedra puts each
+vertex wherever a lattice edge happens to cross the surface, which leaves
+slivers and an uneven distribution — and *that*, not the grid pitch, is what
+makes a curved surface look faceted under shading. The pass relaxes each
+vertex toward its neighbours and then Newton-steps it back onto the exact
+isosurface along the SDF gradient, so the triangles improve while every
+vertex still lies on the true surface. Vertices on a crease are held still,
+so the split line, the latch slot and the flats stay sharp.
+
+Creases are detected from *area-weighted* face normals. Weighting matters: an
+unweighted average lets sliver triangles, whose normals are numerical noise,
+masquerade as creases — the first attempt flagged 85 % of the surface and the
+smoothing did nothing.
+
 ## Deviations from the brief, and why
 
 **Cavity 10.8 × 7.0, not 10 × 6.5.** A 10 × 6.5 stadium does not actually
@@ -113,9 +129,9 @@ pin further back would break the bore out through the outside face — the exact
 failure mode the brief called out. This position gives exactly 1.20 mm of
 material all round the bore.
 
-**The back of the neck is open** from z ≈ 73.6 to 77.0, where the swept relief
+**The back of the neck is open** from z ≈ 74.6 to 78.0, where the swept relief
 clears the knuckle. The bore is fully enclosed below that, and the strips reach
-only z = 71, so they are 2.6 mm clear of the opening. The cap covers it when
+only z = 71.5, so they are 3.1 mm clear of the opening. The cap covers it when
 closed.
 
 **The split line is flush at the front and sides but not across the back.**
@@ -172,10 +188,10 @@ From `out/verification.txt`, 0.30 mm marching grid:
 | Bottom | full R10.55 round, 0 mm² bed contact — needs a brim + tip support |
 | Wall round the pin hole | 1.20 mm (need ≥ 1.2) |
 | Bundle clearance | +0.21 mm at the corners |
-| Cavity enclosed to | z = 73.6; strips reach z = 71.0 → 2.6 mm margin |
+| Cavity enclosed to | z = 74.6; strips reach z = 71.5 → 3.1 mm margin |
 | Latch force | 10.1 N (target 8–12) |
 | Latch peak strain | 0.91 % (PLA yields near 2–3 %) |
-| Mass | 16.61 g at 100 % infill |
+| Mass | 16.95 g at 100 % infill |
 | Steep overhangs | body 2.16 %, cap 4.17 % — most of the body figure is the round bottom, by design |
 
 The swing test rotates the cap about the pin axis in 5° steps and evaluates

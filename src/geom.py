@@ -297,6 +297,109 @@ def orient(verts, tris, fn, eps):
     return out
 
 
+def project_to_surface(p, fn, h=0.01, steps=2):
+    """Newton-step a point onto the fn = 0 isosurface along the gradient."""
+    for _ in range(steps):
+        d = fn(p)
+        gx = (fn((p[0] + h, p[1], p[2])) - d) / h
+        gy = (fn((p[0], p[1] + h, p[2])) - d) / h
+        gz = (fn((p[0], p[1], p[2] + h)) - d) / h
+        g2 = gx * gx + gy * gy + gz * gz
+        if g2 < 1e-12:
+            break
+        k = d / g2
+        p = (p[0] - gx * k, p[1] - gy * k, p[2] - gz * k)
+    return p
+
+
+def smooth_project(verts, tris, fn, passes=3, weight=0.65, crease_deg=42.0):
+    """Tidy the triangulation without moving the surface.
+
+    Marching tetrahedra puts vertices wherever the lattice edges happen to
+    cross, which leaves slivers and an uneven distribution -- that, not the
+    grid pitch, is what makes a curved surface look faceted under shading.
+    This relaxes each vertex toward its neighbours and then pushes it back
+    onto the exact isosurface, so the triangles get better shaped while every
+    vertex still lies on the true surface.
+
+    Vertices on a crease are held still, so the split line, the latch slot
+    and the flats stay sharp instead of being rounded off.
+    """
+    n = len(verts)
+    nbr = [set() for _ in range(n)]
+    for a, b, c in tris:
+        nbr[a].update((b, c))
+        nbr[b].update((a, c))
+        nbr[c].update((a, b))
+
+    # Face normals gathered per vertex, to find creases.  Weighted by area:
+    # marching tetrahedra emits a lot of slivers whose normals are numerical
+    # noise, and an unweighted average lets them masquerade as creases -- on
+    # the first attempt that flagged 85% of the surface and the smoothing did
+    # essentially nothing.
+    acc = [[0.0, 0.0, 0.0] for _ in range(n)]
+    warea = [0.0] * n
+    faces = [[] for _ in range(n)]
+    fnorm, farea = [], []
+    for a, b, c in tris:
+        pa, pb, pc = verts[a], verts[b], verts[c]
+        ux, uy, uz = pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]
+        vx, vy, vz = pc[0] - pa[0], pc[1] - pa[1], pc[2] - pa[2]
+        nx, ny, nz = uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx
+        L = sqrt(nx * nx + ny * ny + nz * nz)
+        i = len(fnorm)
+        if L == 0.0:
+            fnorm.append(None)
+            farea.append(0.0)
+            continue
+        fnorm.append((nx / L, ny / L, nz / L))
+        farea.append(0.5 * L)
+        for v in (a, b, c):
+            faces[v].append(i)
+            acc[v][0] += nx / L * L
+            acc[v][1] += ny / L * L
+            acc[v][2] += nz / L * L
+            warea[v] += 0.5 * L
+
+    lim = cos(crease_deg * 3.141592653589793 / 180.0)
+    free = [True] * n
+    for v in range(n):
+        ax, ay, az = acc[v]
+        L = sqrt(ax * ax + ay * ay + az * az)
+        if L == 0.0 or warea[v] <= 0.0:
+            free[v] = False
+            continue
+        ax, ay, az = ax / L, ay / L, az / L
+        big = 0.10 * warea[v]        # ignore slivers when judging a crease
+        for i in faces[v]:
+            f = fnorm[i]
+            if f is None or farea[i] < big:
+                continue
+            if ax * f[0] + ay * f[1] + az * f[2] < lim:
+                free[v] = False
+                break
+
+    out = list(verts)
+    for _ in range(passes):
+        moved = list(out)
+        for v in range(n):
+            if not free[v] or not nbr[v]:
+                continue
+            sx = sy = sz = 0.0
+            for u in nbr[v]:
+                q = out[u]
+                sx += q[0]; sy += q[1]; sz += q[2]
+            k = len(nbr[v])
+            p = out[v]
+            moved[v] = (p[0] + weight * (sx / k - p[0]),
+                        p[1] + weight * (sy / k - p[1]),
+                        p[2] + weight * (sz / k - p[2]))
+        out = [project_to_surface(moved[v], fn, steps=1) if free[v] else moved[v]
+               for v in range(n)]
+    return [project_to_surface(out[v], fn, steps=1) if free[v] else out[v]
+            for v in range(n)], sum(1 for f in free if f)
+
+
 def tri_area(pa, pb, pc):
     ux, uy, uz = pb[0] - pa[0], pb[1] - pa[1], pb[2] - pa[2]
     vx, vy, vz = pc[0] - pa[0], pc[1] - pa[1], pc[2] - pa[2]

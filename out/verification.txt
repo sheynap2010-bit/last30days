@@ -1,9 +1,9 @@
 grid step 0.30 mm
-  body  sample  34.3s  march   5.3s  324142 verts  648308 tris
-  cap   sample   1.2s  march   1.3s   87274 verts  174552 tris
-  volume body  11486.8 mm^3  cap   1909.3 mm^3  total  13396.1
-  mass at 100% infill: 16.61 g
-  wrote 822860 triangles to out/strip_case.stl
+  body  sample  34.0s  march   4.7s  smooth  29.1s  329132 verts (89617 relaxed)  658284 tris
+  cap   sample   1.2s  march   1.2s  smooth   2.5s   87274 verts (22893 relaxed)  174552 tris
+  volume body  11790.1 mm^3  cap   1877.6 mm^3  total  13667.8
+  mass at 100% infill: 16.95 g
+  wrote 832836 triangles to out/strip_case.stl
 
 1. topology
 -----------
@@ -21,7 +21,7 @@ grid step 0.30 mm
 
    angle   hinge hits  deepest    latch hits  note
       0          0      0.0000          0    
-      5          0      0.0000          3    detent releasing (0.12 mm, tab deflects)
+      5          0      0.0000          7    detent releasing (0.15 mm, tab deflects)
      10          0      0.0000          0    
      15          0      0.0000          0    
      20          0      0.0000          0    
@@ -42,9 +42,9 @@ grid step 0.30 mm
      95          0      0.0000          0    
     100          0      0.0000          0    
     105          0      0.0000          0    
-    110         36     -0.1369          0    HINGE INTERFERENCE
-    115         93     -0.5235          0    HINGE INTERFERENCE
-    120        121     -0.9424          0    HINGE INTERFERENCE
+    110         35     -0.1400          0    HINGE INTERFERENCE
+    115         97     -0.5428          0    HINGE INTERFERENCE
+    120        128     -0.9342          0    HINGE INTERFERENCE
 
 4. measurements
 ---------------
@@ -55,34 +55,34 @@ grid step 0.30 mm
         support-free bottom instead: 103 mm^2, 45 deg at the bed.
   material between the pin hole and the ear surface: 1.20 mm
         thinnest at 89 deg round the axis, ear at x = -6.0   (need >= 1.2)
-  cavity  10.81 wide x 7.00 thick x 66.00 deep
+  cavity  10.81 wide x 7.00 thick x 66.50 deep
   section at mid strip: 7.01 mm back to front (-3.50 to +3.50)
-  fully enclosed up to z = 73.6; strips reach z = 71.0  -> 2.6 mm of margin
+  fully enclosed up to z = 74.6; strips reach z = 71.5  -> 3.1 mm of margin
   bundle  8.00 wide x 5.00 thick x 60.00 long (10 x 0.5 mm strips)
   clearance at the bundle corners: +0.21 mm, best seating y = +0.00
         (measured above the 0.6 mm fillet at the cavity floor)
-  retrieval margin over the 60 mm strip: 6.00 mm
+  retrieval margin over the 60 mm strip: 6.50 mm
   tab: 8.0 wide x 1.19-3.44 thick x 11.65 long
   bead 0.75 proud, 0.45 engaged past the skirt (0.30 is clearance)
   force to deflect it clear of the groove: 10.1 N   (target 8-12)
   peak surface strain at the root: 0.91 %   (PLA yields near 2-3 %)
-  body  surface samples steeper than 45 deg: 863 of 39983 (2.16 %)
-        (plus 263 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-1.20, -0.82, 0.17)
-  cap   surface samples steeper than 45 deg: 1667 of 39999 (4.17 %)
-        (plus 1029 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
-        worst 90 deg at (-4.21, -5.27, 75.50)
+  body  surface samples steeper than 45 deg: 844 of 39952 (2.11 %)
+        (plus 269 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-4.93, -2.56, 81.46)
+  cap   surface samples steeper than 45 deg: 1659 of 39999 (4.15 %)
+        (plus 1038 with material within 0.6 mm directly below -- those bridge a gap, they do not print over air)
+        worst 90 deg at (-3.57, -5.49, 76.50)
 
 5. mass
 -------
-  body 11486.8 mm^3, cap 1909.3 mm^3, total 13396.1 mm^3
-  PLA at 1.24 g/cm^3, 100% infill: 16.61 g
+  body 11790.1 mm^3, cap 1877.6 mm^3, total 13667.8 mm^3
+  PLA at 1.24 g/cm^3, 100% infill: 16.95 g
 
 summary
 -------
   topology ok        : True
   closed-position hits: 0
   swing stations with interference: 3
-     110 deg: 36 points, -0.137 mm
-     115 deg: 93 points, -0.524 mm
-     120 deg: 121 points, -0.942 mm
+     110 deg: 35 points, -0.140 mm
+     115 deg: 97 points, -0.543 mm
+     120 deg: 128 points, -0.934 mm

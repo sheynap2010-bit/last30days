@@ -37,8 +37,8 @@ def closed_intersection(bm, cm, step=0.25):
     larger than the clearances being checked, so a mesh-based test reports
     penetrations that are not in the model.
     """
-    lo = (-11.0, -7.0, 71.0)
-    hi = (11.0, 7.0, 95.5)
+    lo = (-11.0, -7.0, 72.0)
+    hi = (11.0, 7.0, 96.5)
     n = [int((hi[i] - lo[i]) / step) + 1 for i in range(3)]
     inter = worst = 0
     worst_d = 0.0

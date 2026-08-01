@@ -1,13 +1,14 @@
 """Polygonise the two solids and write the STL / OBJ deliverables."""
 
 import sys, time, os
-from geom import Grid, polygonise, orient, write_stl, volume, tri_area
+from geom import (Grid, polygonise, orient, write_stl, volume, tri_area,
+                  smooth_project)
 import model as M
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'out')
 
-BODY_BOX = ((-11.0, -7.0, -1.0), (11.0, 7.0, 83.0))
-CAP_BOX = ((-11.0, -7.0, 74.0), (11.0, 7.0, 96.0))
+BODY_BOX = ((-11.0, -7.0, -1.0), (11.0, 7.0, 84.0))
+CAP_BOX = ((-11.0, -7.0, 75.0), (11.0, 7.0, 97.0))
 
 
 def build(fn, box, step, name):
@@ -16,9 +17,12 @@ def build(fn, box, step, name):
     t1 = time.time()
     verts, tris = polygonise(g)
     t2 = time.time()
+    verts, nfree = smooth_project(verts, tris, fn)
+    t3 = time.time()
     tris = orient(verts, tris, fn, step * 0.35)
-    print('  %-5s sample %5.1fs  march %5.1fs  %6d verts %7d tris'
-          % (name, t1 - t0, t2 - t1, len(verts), len(tris)))
+    print('  %-5s sample %5.1fs  march %5.1fs  smooth %5.1fs'
+          '  %6d verts (%d relaxed) %7d tris'
+          % (name, t1 - t0, t2 - t1, t3 - t2, len(verts), nfree, len(tris)))
     return verts, tris
 
 
